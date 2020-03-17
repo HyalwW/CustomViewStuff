@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DnmButton">
+        <attr name="radius" format="dimension" />
+        <attr name="longClickDuration" format="integer" />
+        <attr name="clickColor" format="color" />
+        <attr name="longClickColor" format="color" />
+        <attr name="shadowWidth" format="dimension" />
+        <attr name="shadowColor" format="color" />
+    </declare-styleable>
+</resources>

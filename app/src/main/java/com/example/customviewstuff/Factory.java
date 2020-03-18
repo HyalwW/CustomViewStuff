@@ -4,9 +4,12 @@ import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
+import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.TriAngleActivity;
+import com.example.customviewstuff.activities.VideoActivity;
+import com.example.customviewstuff.activities.WebActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +26,9 @@ public class Factory {
     private static final String RIPPLE = "上升气泡";
     private static final String SAE = "抖动与爆炸";
     private static final String TRIANGLE = "酷炫随机三角";
+    private static final String SHINNY_WEB = "浮动的网";
+    private static final String STRING_VIDEO = "纯字电影";
+    private static final String PIC_TO_TEXT = "画画的字";
 
     static {
         caches = new HashMap<>();
@@ -33,6 +39,9 @@ public class Factory {
         caches.put(RIPPLE, RippleActivity.class);
         caches.put(SAE, SAEActivity.class);
         caches.put(TRIANGLE, TriAngleActivity.class);
+        caches.put(SHINNY_WEB, WebActivity.class);
+        caches.put(PIC_TO_TEXT, PTTActivity.class);
+        caches.put(STRING_VIDEO, VideoActivity.class);
     }
 
     public static Class create(String s) {

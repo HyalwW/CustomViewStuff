@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.customviewstuff">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -12,7 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.JumpBeanActivity"></activity>
+        <activity android:name=".activities.PTTActivity"></activity>
+        <activity android:name=".activities.WebActivity" />
+        <activity android:name=".activities.VideoActivity" />
+        <activity android:name=".activities.JumpBeanActivity" />
         <activity android:name=".activities.TriAngleActivity" />
         <activity android:name=".activities.SAEActivity" />
         <activity android:name=".activities.CartActivity" />

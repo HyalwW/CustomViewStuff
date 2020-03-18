@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activities.PTTActivity">
+
+        <com.example.customviewstuff.customs.DnmButton
+            android:id="@+id/choose_pic"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:text="选择图片"
+            app:layout_constraintEnd_toStartOf="@id/take_photo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.example.customviewstuff.customs.DnmButton
+            android:id="@+id/take_photo"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:text="拍照"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/choose_pic"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.example.customviewstuff.customs.BTTView
+            android:id="@+id/ptt_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/choose_pic" />
+
+        <com.example.customviewstuff.customs.DnmButton
+            android:id="@+id/draw"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="60dp"
+            android:text="增强"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+</layout>

@@ -12,6 +12,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatTextView;
@@ -65,7 +66,7 @@ public class DnmButton extends AppCompatTextView {
         radiusArray = new float[8];
         if (attrs != null) {
             TypedArray arr = context.obtainStyledAttributes(attrs, R.styleable.DnmButton);
-            radius = arr.getDimension(R.styleable.DnmButton_radius, 0);
+            radius = arr.getDimension(R.styleable.DnmButton_radius, 10);
             lcDuration = arr.getInt(R.styleable.DnmButton_longClickDuration, 700);
             clickColor = arr.getColor(R.styleable.DnmButton_clickColor, Color.LTGRAY);
             longClickColor = arr.getColor(R.styleable.DnmButton_longClickColor, Color.DKGRAY);
@@ -78,6 +79,7 @@ public class DnmButton extends AppCompatTextView {
             longClickColor = Color.DKGRAY;
             shadowWidth = 10;
             shadowColor = Color.GRAY;
+            radius = 10;
         }
         for (int i = 0; i < radiusArray.length; i++) {
             radiusArray[i] = radius;
@@ -121,6 +123,9 @@ public class DnmButton extends AppCompatTextView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!isEnabled()) {
+            return true;
+        }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 inTouch = true;
@@ -177,11 +182,19 @@ public class DnmButton extends AppCompatTextView {
     public void draw(Canvas canvas) {
         rectF.set(shadowWidth, shadowWidth, getMeasuredWidth() - shadowWidth, getMeasuredHeight() - shadowWidth);
         drawShadow(canvas);
-        canvas.saveLayer(rectF, null, Canvas.ALL_SAVE_FLAG);
-        super.draw(canvas);
-        if (radius > 0) {
-            drawBorder(canvas);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (radius > 0) {
+                canvas.clipPath(path);
+                super.draw(canvas);
+            }
+        } else {
+            canvas.saveLayer(rectF, null, Canvas.ALL_SAVE_FLAG);
+            super.draw(canvas);
+            if (radius > 0) {
+                drawBorder(canvas);
+            }
         }
+
     }
 
     private void drawShadow(Canvas canvas) {

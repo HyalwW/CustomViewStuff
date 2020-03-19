@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.PTTActivity"></activity>
+        <activity android:name=".activities.TimeActivity"></activity>
+        <activity android:name=".activities.PTTActivity" />
         <activity android:name=".activities.WebActivity" />
         <activity android:name=".activities.VideoActivity" />
         <activity android:name=".activities.JumpBeanActivity" />

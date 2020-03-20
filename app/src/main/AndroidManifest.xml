@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.TimeActivity"></activity>
+        <activity android:name=".activities.TextAnimActivity" />
+        <activity android:name=".activities.TimeActivity" />
         <activity android:name=".activities.PTTActivity" />
         <activity android:name=".activities.WebActivity" />
         <activity android:name=".activities.VideoActivity" />
@@ -30,7 +31,6 @@
         <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

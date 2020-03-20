@@ -30,6 +30,7 @@ public class TimeView extends View {
     private int secondMillis;
     private double offset = Math.PI / 2;
     private Calendar calendar;
+    private float baseSize;
     private float secSize, minSize, houSize;
     private static final String FONT_DIGITAL_7 = "fonts" + File.separator + "digital-7-m.ttf";
 
@@ -50,11 +51,9 @@ public class TimeView extends View {
     private void init() {
         rulerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         rulerPaint.setColor(Color.WHITE);
-        rulerPaint.setTextSize(dp2px(16));
         rulerPaint.setTextAlign(Paint.Align.CENTER);
 
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setTextSize(dp2px(45));
         textPaint.setColor(Color.WHITE);
         textPaint.setTextAlign(Paint.Align.CENTER);
         AssetManager assets = getResources().getAssets();
@@ -64,7 +63,6 @@ public class TimeView extends View {
 
         hollowCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         hollowCirclePaint.setStyle(Paint.Style.STROKE);
-        hollowCirclePaint.setStrokeWidth(dp2px(1));
         hollowCirclePaint.setColor(Color.WHITE);
 
         calendar = Calendar.getInstance();
@@ -74,6 +72,10 @@ public class TimeView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int size = MeasureSpec.getSize(widthMeasureSpec);
         setMeasuredDimension(size, size);
+        baseSize = (float) size / 300;
+        rulerPaint.setTextSize(dp2px(16));
+        textPaint.setTextSize(dp2px(45));
+        hollowCirclePaint.setStrokeWidth(dp2px(1));
     }
 
     @Override
@@ -114,7 +116,7 @@ public class TimeView extends View {
     }
 
     private void drawSecondCircles(Canvas canvas) {
-        canvas.drawCircle(secCx, sexCy, dp2px(2), hollowCirclePaint);
+        canvas.drawCircle(secCx, sexCy, dp2px(20), hollowCirclePaint);
         canvas.drawCircle(secCx, sexCy, dp2px(2), hollowCirclePaint);
         double angle = (float) secondMillis / 500 * Math.PI - offset;
         canvas.drawLine((float) (secCx + dp2px(2) * Math.cos(angle)),
@@ -137,7 +139,7 @@ public class TimeView extends View {
 
     private void drawTime(Canvas canvas) {
         rulerPaint.setColor(Color.LTGRAY);
-        canvas.drawText(date, cx, cy - dp2px(30), rulerPaint);
+        canvas.drawText(date, cx, cy - dp2px(50), rulerPaint);
         canvas.drawText(now, cx, cy, textPaint);
     }
 
@@ -189,10 +191,6 @@ public class TimeView extends View {
         removeCallbacks(millisRun);
     }
 
-    private float dimen(int res) {
-        return getResources().getDimension(res);
-    }
-
     /**
      * dp转px
      *
@@ -200,7 +198,8 @@ public class TimeView extends View {
      * @return px值
      */
     private float dp2px(float dpValue) {
-        final float scale = getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
+        return baseSize * dpValue;
+//        final float scale = getResources().getDisplayMetrics().density;
+//        return (int) (dpValue * scale + 0.5f);
     }
 }

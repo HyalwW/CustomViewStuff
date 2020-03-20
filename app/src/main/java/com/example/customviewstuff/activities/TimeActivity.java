@@ -16,4 +16,11 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> {
         dataBinding.t1.tick();
         dataBinding.t2.start();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dataBinding.t1.destroy();
+        dataBinding.t2.destroy();
+    }
 }

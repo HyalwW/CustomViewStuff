@@ -7,6 +7,7 @@ import com.example.customviewstuff.activities.JumpBeanActivity;
 import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
+import com.example.customviewstuff.activities.TextAnimActivity;
 import com.example.customviewstuff.activities.TimeActivity;
 import com.example.customviewstuff.activities.TriAngleActivity;
 import com.example.customviewstuff.activities.VideoActivity;
@@ -31,6 +32,7 @@ public class Factory {
     private static final String STRING_VIDEO = "纯字电影";
     private static final String PIC_TO_TEXT = "画画的字";
     private static final String TIME = "酷炫时钟";
+    private static final String TEXT_ANIM = "字的路径";
 
     static {
         caches = new HashMap<>();
@@ -45,6 +47,7 @@ public class Factory {
         caches.put(PIC_TO_TEXT, PTTActivity.class);
         caches.put(STRING_VIDEO, VideoActivity.class);
         caches.put(TIME, TimeActivity.class);
+        caches.put(TEXT_ANIM, TextAnimActivity.class);
     }
 
     public static Class create(String s) {

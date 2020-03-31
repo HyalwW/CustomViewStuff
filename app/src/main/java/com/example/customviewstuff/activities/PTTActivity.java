@@ -101,7 +101,7 @@ public class PTTActivity extends BaseActivity<ActivityPttBinding> implements Vie
                 takePhoto();
                 break;
             case R.id.draw:
-                dataBinding.pttView.draw();
+                dataBinding.pttView.draw(true);
                 break;
         }
     }

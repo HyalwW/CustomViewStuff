@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.example.customviewstuff.R;
@@ -23,13 +24,21 @@ import java.util.Random;
  */
 public class BTTView extends BaseSurfaceView {
     private Bitmap bitmap, base;
+    //需要用哪些字来绘制
     private String[] temps;
+    //颜色跨度
     private int colorGap;
+    //字的大小
     private int textSize;
     //一行多少字
-    private int textInLine = 0;
-    private Rect dst;
+    private int textInLine = 10;
+    //绘制的字
+    private String[][] strings;
+    //原图片展示位置
+    private Rect dst, textRect;
     private Random random;
+    private boolean isDraw, isScale;
+    private float sx, sy;
 
     public BTTView(Context context) {
         super(context);
@@ -51,7 +60,7 @@ public class BTTView extends BaseSurfaceView {
         temps = Arrays.copyOfRange(temps, 1, temps.length);
         colorGap = -Color.BLACK / temps.length;
         dst = new Rect();
-        mPaint.setFilterBitmap(true);
+        textRect = new Rect();
         random = new Random();
         setZOrderOnTop(true);
         holder.setFormat(PixelFormat.TRANSLUCENT);
@@ -64,7 +73,7 @@ public class BTTView extends BaseSurfaceView {
                 setBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.gm));
                 toast("默认图片载入完成");
             }
-            draw();
+            draw(false);
         });
     }
 
@@ -72,19 +81,45 @@ public class BTTView extends BaseSurfaceView {
     protected void onDataUpdate() {
     }
 
-    public void draw() {
+    public void draw(boolean raiseTextInLine) {
+
         if (base == null) {
             toast("请先设置图片");
             return;
         }
-        textInLine += 10;
+        if (isDraw) {
+            return;
+        }
+        //先清除上次画的
+//        callDraw("clear", textRect);
+//        callDraw("clear", dst);
+        if (raiseTextInLine) {
+            textInLine += 10;
+            resize();
+        } else {
+            if (strings == null) {
+                resize();
+            }
+        }
+        callDraw("textPaint", textRect);
+        if (textInLine >= 540) {
+            callDraw(base, dst);
+        }
+    }
+
+    private void resize() {
         if (textInLine < base.getWidth()) {
             if (bitmap != null && !bitmap.isRecycled()) {
                 bitmap.recycle();
             }
             bitmap = BitmapUtil.scaleBitmap(base, (float) textInLine / base.getWidth());
+        } else {
+            if (bitmap != null && !bitmap.isRecycled()) {
+                bitmap.recycle();
+            }
+            bitmap = Bitmap.createBitmap(base);
         }
-        String[][] strings = new String[bitmap.getHeight()][bitmap.getWidth()];
+        strings = new String[bitmap.getHeight()][bitmap.getWidth()];
         textSize = getMeasuredWidth() / textInLine;
         for (int i = 0; i < strings.length; i++) {
             for (int j = 0; j < strings[i].length; j++) {
@@ -92,13 +127,16 @@ public class BTTView extends BaseSurfaceView {
                 strings[i][j] = genText(pixel);
             }
         }
-        callDraw(strings);
+        int bottom = Math.max(textSize * (strings.length + 1), textRect.bottom);
+        textRect.set(0, 0, getMeasuredWidth(), bottom);
+        int top = bottom + textSize;
+        dst.set(0, top, getMeasuredWidth(), (int) (top + base.getHeight() * ((float) getMeasuredWidth() / base.getWidth())));
     }
 
     public void load(String url) {
         if (base != null && !base.isRecycled()) {
             base.recycle();
-            textInLine = 0;
+            textInLine = 10;
         }
         doInThread(() -> {
             Bitmap bitmap = BitmapUtil.getURLimage(url);
@@ -117,7 +155,7 @@ public class BTTView extends BaseSurfaceView {
     }
 
     public void setBitmap(Bitmap bitmap) {
-        textInLine = 0;
+        textInLine = 10;
         if (bitmap.getHeight() > bitmap.getWidth()) {
             bitmap = BitmapUtil.rotate(bitmap, 90, bitmap.getWidth() >> 1, bitmap.getWidth() >> 1, true);
         }
@@ -135,53 +173,58 @@ public class BTTView extends BaseSurfaceView {
 
     }
 
-    String[] tags = new String[]{"知道上面是什么图吗？", "猜猜上面什么图"};
+//    String[] tags = new String[]{"知道上面是什么图吗？", "猜猜上面什么图"};
 
     @Override
     protected void draw(Canvas canvas, Object data) {
-//        canvas.drawColor(Color.WHITE);
-        if (data instanceof String[][]) {
-            String[][] strings = (String[][]) data;
-            mPaint.setTextSize(textSize);
-            StringBuilder builder;
-            mPaint.setStyle(Paint.Style.FILL);
-            mPaint.setColor(Color.argb(180, 255, 255, 255));
-            canvas.drawRect(0, 0, getMeasuredWidth(), textSize * (strings.length + 1), mPaint);
-            mPaint.setColor(Color.BLACK);
-            for (int i = 0; i < strings.length; i++) {
-                String[] string = strings[i];
-                builder = new StringBuilder();
-                for (String s : string) {
-                    builder.append(s);
-                }
-                float width = mPaint.measureText(builder.toString());
-                canvas.drawText(builder.toString(), (float) getMeasuredWidth() / 2 - width / 2, textSize * (i + 1), mPaint);
-            }
-            if (textInLine < 540) {
-                mPaint.setTextSize(50 + random.nextFloat() * 20);
-                mPaint.setColor(randomColor());
-                String text = tags[random.nextInt(2)];
-                float width = mPaint.measureText(text);
-                canvas.rotate(-20 + random.nextFloat() * 40, (float) getMeasuredWidth() / 2 - width / 2, (float) (getMeasuredHeight() * 0.7));
-                canvas.drawText(text, (float) getMeasuredWidth() / 2 - width / 2, (float) (getMeasuredHeight() * 0.6), mPaint);
-            } else {
-                int top = textSize * (strings.length + 2);
-                dst.set(0, top, getMeasuredWidth(), (int) (top + base.getHeight() * ((float) getMeasuredWidth() / base.getWidth())));
-                canvas.drawBitmap(base, null, dst, mPaint);
-//                mPaint.setTextAlign(Paint.Align.CENTER);
-//                mPaint.setFakeBoldText(true);
-//                mPaint.setColor(Color.RED);
-//                mPaint.setTextSize(60);
-//                canvas.drawText("D~D~D~DENG~~", getMeasuredWidth() >> 1, (float) (getMeasuredHeight() * 0.75), mPaint);
-//                mPaint.setTextSize(68);
-//                canvas.drawText("《鬼灭之刃》", getMeasuredWidth() >> 1, (float) (getMeasuredHeight() * 0.8), mPaint);
-            }
-        }
     }
 
     @Override
     protected void onDrawRect(Canvas canvas, Object data, Rect rect) {
-
+        isDraw = true;
+        if (data instanceof String) {
+            switch (((String) data)) {
+                case "clear":
+                    clearCanvas(canvas);
+                    break;
+                case "textPaint":
+                    if (isScale) {
+                        canvas.save();
+                        float scale = (float) Math.sqrt(textInLine / 10f);
+                        canvas.scale(scale, scale, sx, sy);
+                    }
+                    mPaint.setTextSize(textSize);
+                    StringBuilder builder;
+                    mPaint.setStyle(Paint.Style.FILL);
+                    mPaint.setColor(Color.argb(180, 255, 255, 255));
+                    canvas.drawRect(rect.left, rect.top, rect.right, rect.bottom, mPaint);
+                    mPaint.setColor(Color.BLACK);
+                    for (int i = 0; i < strings.length; i++) {
+                        String[] string = strings[i];
+                        builder = new StringBuilder();
+                        for (String s : string) {
+                            builder.append(s);
+                        }
+                        float width = mPaint.measureText(builder.toString());
+                        canvas.drawText(builder.toString(), rect.left + (float) getMeasuredWidth() / 2 - width / 2, rect.top + textSize * (i + 1), mPaint);
+                    }
+                    if (isScale) {
+                        canvas.restore();
+                    }
+//            if (textInLine < 540) {
+//                mPaint.setTextSize(50 + random.nextFloat() * 20);
+//                mPaint.setColor(randomColor());
+//                String text = tags[random.nextInt(2)];
+//                float width = mPaint.measureText(text);
+//                canvas.rotate(-20 + random.nextFloat() * 40, (float) getMeasuredWidth() / 2 - width / 2, (float) (getMeasuredHeight() * 0.7));
+//                canvas.drawText(text, (float) getMeasuredWidth() / 2 - width / 2, (float) (getMeasuredHeight() * 0.6), mPaint);
+//            }
+                    break;
+            }
+        } else if (data instanceof Bitmap) {
+            canvas.drawBitmap(base, null, rect, mPaint);
+        }
+        isDraw = false;
     }
 
     private int randomColor() {
@@ -195,5 +238,23 @@ public class BTTView extends BaseSurfaceView {
 
     private void toast(String s) {
         post(() -> Toast.makeText(getContext().getApplicationContext(), s, Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_MOVE:
+                sx = event.getX();
+                sy = event.getY();
+                isScale = true;
+                draw(false);
+                break;
+            case MotionEvent.ACTION_UP:
+                isScale = false;
+                draw(false);
+                break;
+        }
+        return true;
     }
 }

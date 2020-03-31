@@ -13,6 +13,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -97,7 +98,10 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
         isDrawing = true;
         onDataUpdate();
         if (dirty != null) {
+            Log.e("wwh", "BaseSurfaceView --> drawEverything: " + dirty);
             Canvas canvas = holder.lockCanvas(dirty);
+            //todo 第一次会出现问题
+            Log.e("wwh", "BaseSurfaceView --> drawEverything: " + dirty);
             if (canvas != null) {
                 if (!preventClear()) {
                     clearCanvas(canvas);
@@ -145,6 +149,8 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
         mHandlerThread = new HandlerThread("drawThread");
         mHandlerThread.start();
         drawHandler = new Handler(mHandlerThread.getLooper(), this);
+        //解决第一次使用dirty会被改变的问题
+        callDraw("", new Rect());
         onReady();
         if (listener != null) {
             listener.onCreate();

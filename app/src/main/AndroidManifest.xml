@@ -16,7 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.TreeGrowActivity" android:screenOrientation="landscape" />
+        <activity
+            android:name=".activities.TreeGrowActivity"
+            android:screenOrientation="landscape" />
         <activity android:name=".activities.TextAnimActivity" />
         <activity android:name=".activities.TimeActivity" />
         <activity android:name=".activities.PTTActivity" />

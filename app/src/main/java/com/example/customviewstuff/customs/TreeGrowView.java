@@ -23,12 +23,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class TreeGrowView extends BaseSurfaceView {
     private PathMeasure measure;
     private long duration = 30;
-    private static final int leaveDepth = 10;
+    private static final int leaveDepth = 11;
     private double pi = Math.PI;
     private Random random;
     private List<TreePath> paths;
     private boolean isDestroy;
     private Path path, src, drawPath;
+    private float minHeight, maxHeight;
 
     public TreeGrowView(Context context) {
         super(context);
@@ -57,12 +58,14 @@ public class TreeGrowView extends BaseSurfaceView {
 
     @Override
     protected void onReady() {
-        float maxLen = getMeasuredHeight() / 7f;
+        float maxLen = getMeasuredHeight() / 5f;
         float maxWid = getMeasuredWidth() / 50f;
         if (paths.size() > 0) {
             paths.clear();
         }
         isDestroy = false;
+        minHeight = 0;
+        maxHeight = getMeasuredHeight();
         TreeNode root = new TreeNode(1, null);
         root.set(new PointF(getMeasuredWidth() >> 1, getMeasuredHeight()), (float) (-pi / 2), maxLen, maxWid);
         doInThread(() -> draw(root));
@@ -93,17 +96,22 @@ public class TreeGrowView extends BaseSurfaceView {
             if (node.depth == leaveDepth) {
                 int color = randomColor();
                 TreeNode left = new TreeNode(node.depth + 1, node);
-                left.set(node.end, randomAngle(node.angle, true), node.length * 0.8f, node.width * 0.8f);
+                left.set(node.end, randomAngle(node.angle, true), node.length * 0.7f, node.width * 0.8f);
                 paths.add(new TreePath(left, left.width * 3, color));
                 TreeNode right = new TreeNode(node.depth + 1, node);
-                right.set(node.end, randomAngle(node.angle, false), node.length * 0.8f, node.width * 0.8f);
+                right.set(node.end, randomAngle(node.angle, false), node.length * 0.7f, node.width * 0.8f);
                 paths.add(new TreePath(right, right.width * 3, color));
                 draw(node.parent);
                 return;
             }
         }
-//        float childLength = node.length * 0.8f + node.length * 0.2f * random.nextFloat();
-        float childLength = node.length * 0.9f;
+        float childLength = node.length * 0.8f + node.length * 0.1f * random.nextFloat();
+//        float childLength;
+//        if (node.depth < leaveDepth * 0.7) {
+//            childLength = node.length * 0.9f + node.length * 0.5f * random.nextFloat();
+//        } else {
+//            childLength = node.length * 0.6f + node.length * 0.1f * random.nextFloat();
+//        }
         if (node.left == null) {
             TreeNode left = new TreeNode(node.depth + 1, node);
             left.set(node.end, randomAngle(node.angle, true), childLength, node.width * 0.8f);
@@ -146,6 +154,10 @@ public class TreeGrowView extends BaseSurfaceView {
         if (data instanceof String) {
             canvas.drawColor(Color.WHITE);
         } else if (data instanceof Path) {
+            if (maxHeight - minHeight > getMeasuredHeight()) {
+                float scale = getMeasuredHeight() / ((maxHeight - minHeight) * 1.3f);
+                canvas.scale(scale, scale, getMeasuredWidth() >> 1, getMeasuredHeight() * 0.8f);
+            }
             mPaint.setColor(Color.WHITE);
             mPaint.setStyle(Paint.Style.STROKE);
             canvas.drawPath((Path) data, mPaint);
@@ -195,6 +207,8 @@ public class TreeGrowView extends BaseSurfaceView {
             this.length = length;
             this.width = width;
             this.end = new PointF(((float) (length * Math.cos(angle) + start.x)), (float) (length * Math.sin(angle) + start.y));
+            minHeight = Math.min(end.y, minHeight);
+            maxHeight = Math.max(end.y, maxHeight);
         }
 
         void getPath(Path src) {

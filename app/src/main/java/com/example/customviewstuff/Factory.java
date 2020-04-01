@@ -9,6 +9,7 @@ import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;
 import com.example.customviewstuff.activities.TimeActivity;
+import com.example.customviewstuff.activities.TreeGrowActivity;
 import com.example.customviewstuff.activities.TriAngleActivity;
 import com.example.customviewstuff.activities.VideoActivity;
 import com.example.customviewstuff.activities.WebActivity;
@@ -33,6 +34,7 @@ public class Factory {
     private static final String PIC_TO_TEXT = "画画的字";
     private static final String TIME = "酷炫时钟";
     private static final String TEXT_ANIM = "字的路径";
+    private static final String TEXT_TREE_GROW = "成长的树";
 
     static {
         caches = new HashMap<>();
@@ -48,6 +50,7 @@ public class Factory {
         caches.put(STRING_VIDEO, VideoActivity.class);
         caches.put(TIME, TimeActivity.class);
         caches.put(TEXT_ANIM, TextAnimActivity.class);
+        caches.put(TEXT_TREE_GROW, TreeGrowActivity.class);
     }
 
     public static Class create(String s) {

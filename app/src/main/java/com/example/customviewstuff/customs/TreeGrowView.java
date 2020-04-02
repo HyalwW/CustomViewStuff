@@ -9,7 +9,6 @@ import android.graphics.PathMeasure;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.util.List;
@@ -22,8 +21,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class TreeGrowView extends BaseSurfaceView {
     private PathMeasure measure;
-    private long duration = 30;
-    private static final int leaveDepth = 11;
+    private long duration = 50;
+    private static final int leaveDepth = 10;
     private double pi = Math.PI;
     private Random random;
     private List<TreePath> paths;
@@ -58,6 +57,10 @@ public class TreeGrowView extends BaseSurfaceView {
 
     @Override
     protected void onReady() {
+        restart();
+    }
+
+    private void restart() {
         float maxLen = getMeasuredHeight() / 5f;
         float maxWid = getMeasuredWidth() / 50f;
         if (paths.size() > 0) {
@@ -96,46 +99,65 @@ public class TreeGrowView extends BaseSurfaceView {
             if (node.depth == leaveDepth) {
                 int color = randomColor();
                 TreeNode left = new TreeNode(node.depth + 1, node);
-                left.set(node.end, randomAngle(node.angle, true), node.length * 0.7f, node.width * 0.8f);
+                left.set(node.end, randomAngle(node.angle, true, node.depth), node.length * 0.7f, node.width * 0.8f);
                 paths.add(new TreePath(left, left.width * 3, color));
                 TreeNode right = new TreeNode(node.depth + 1, node);
-                right.set(node.end, randomAngle(node.angle, false), node.length * 0.7f, node.width * 0.8f);
+                right.set(node.end, randomAngle(node.angle, false, node.depth), node.length * 0.7f, node.width * 0.8f);
                 paths.add(new TreePath(right, right.width * 3, color));
                 draw(node.parent);
                 return;
             }
         }
-        float childLength = node.length * 0.8f + node.length * 0.1f * random.nextFloat();
-//        float childLength;
-//        if (node.depth < leaveDepth * 0.7) {
-//            childLength = node.length * 0.9f + node.length * 0.5f * random.nextFloat();
-//        } else {
-//            childLength = node.length * 0.6f + node.length * 0.1f * random.nextFloat();
-//        }
+        float childLength;
+        childLength = randomLength(node);
         if (node.left == null) {
             TreeNode left = new TreeNode(node.depth + 1, node);
-            left.set(node.end, randomAngle(node.angle, true), childLength, node.width * 0.8f);
+            left.set(node.end, randomAngle(node.angle, true, node.depth), childLength, node.width * 0.8f);
             node.left = left;
             draw(node.left);
         } else if (node.right == null) {
             TreeNode right = new TreeNode(node.depth + 1, node);
-            right.set(node.end, randomAngle(node.angle, false), childLength, node.width * 0.8f);
+            right.set(node.end, randomAngle(node.angle, false, node.depth), childLength, node.width * 0.8f);
             node.right = right;
             draw(node.right);
         } else if (node.parent != null) {
             draw(node.parent);
         } else {
-            Log.e("wwh", "TreeGrowView --> draw: done");
+            postDelayed(this::restart, 50000);
+        }
+    }
+
+    private float randomLength(TreeNode node) {
+        float length = getMeasuredHeight() / 5f;
+        float childLength = node.length * 0.85f + node.length * 0.05f * random.nextFloat();
+//        if (node.depth < leaveDepth * 0.7) {
+//            childLength = length * 0.4f + length * random.nextFloat();
+//        } else {
+//            childLength = length * 0.6f + length * 0.3f * random.nextFloat();
+//        }
+        return childLength;
+    }
+
+    private float randomAngle(float parentAngle, boolean isLeft, int depth) {
+//        float angle = (float) (parentAngle - pi / 6 + random.nextFloat() * pi / 3);
+//        if (angle < -pi) {
+//            angle += pi / 3;
+//        }
+//        if (angle > 0) {
+//            angle -= pi / 3;
+//        }
+//        return angle;
+        if (depth < leaveDepth * 0.3) {
+            return isLeft ? (float) (parentAngle - (pi / 16 + random.nextFloat() * pi / 8))
+                    : (float) (parentAngle + (pi / 16 + random.nextFloat() * pi / 8));
+        } else {
+            return isLeft ? (float) (parentAngle - (pi / 20 + random.nextFloat() * pi / 12))
+                    : (float) (parentAngle + (pi / 20 + random.nextFloat() * pi / 12));
         }
     }
 
     private int randomColor() {
         return Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-    }
-
-    private float randomAngle(float parentAngle, boolean isLeft) {
-        return isLeft ? (float) (parentAngle - (pi / 16 + random.nextFloat() * pi / 8))
-                : (float) (parentAngle + (pi / 16 + random.nextFloat() * pi / 8));
     }
 
 

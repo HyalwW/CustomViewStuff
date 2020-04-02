@@ -231,6 +231,14 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
         }
     }
 
+    protected void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     private final class MsgBuilder {
 
         private Message message;

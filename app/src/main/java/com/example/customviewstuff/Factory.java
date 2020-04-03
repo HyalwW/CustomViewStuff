@@ -4,6 +4,7 @@ import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
+import com.example.customviewstuff.activities.LightingActivity;
 import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
@@ -35,6 +36,7 @@ public class Factory {
     private static final String TIME = "酷炫时钟";
     private static final String TEXT_ANIM = "字的路径";
     private static final String TEXT_TREE_GROW = "成长的树";
+    private static final String LIGHTING = "闪电";
 
     static {
         caches = new HashMap<>();
@@ -51,6 +53,7 @@ public class Factory {
         caches.put(TIME, TimeActivity.class);
         caches.put(TEXT_ANIM, TextAnimActivity.class);
         caches.put(TEXT_TREE_GROW, TreeGrowActivity.class);
+        caches.put(LIGHTING, LightingActivity.class);
     }
 
     public static Class create(String s) {

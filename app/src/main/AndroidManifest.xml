@@ -19,6 +19,7 @@
         <activity
             android:name=".activities.TreeGrowActivity"
             android:screenOrientation="landscape" />
+        <activity android:name=".activities.LightingActivity" />
         <activity android:name=".activities.TextAnimActivity" />
         <activity android:name=".activities.TimeActivity" />
         <activity android:name=".activities.PTTActivity" />

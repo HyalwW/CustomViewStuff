@@ -3,6 +3,7 @@ package com.example.customviewstuff;
 import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.HeartActivity;
+import com.example.customviewstuff.activities.HexaActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
 import com.example.customviewstuff.activities.LightingActivity;
 import com.example.customviewstuff.activities.PTTActivity;
@@ -10,6 +11,7 @@ import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;
 import com.example.customviewstuff.activities.TimeActivity;
+import com.example.customviewstuff.activities.TreeActivity;
 import com.example.customviewstuff.activities.TreeGrowActivity;
 import com.example.customviewstuff.activities.TriAngleActivity;
 import com.example.customviewstuff.activities.VideoActivity;
@@ -35,8 +37,10 @@ public class Factory {
     private static final String PIC_TO_TEXT = "画画的字";
     private static final String TIME = "酷炫时钟";
     private static final String TEXT_ANIM = "字的路径";
-    private static final String TEXT_TREE_GROW = "成长的树";
+    private static final String TEXT_TREE_GROW = "成长的树（深度优先）";
+    private static final String TREE = "成长的树（广度优先）";
     private static final String LIGHTING = "闪电";
+    private static final String HEXA = "六边形";
 
     static {
         caches = new HashMap<>();
@@ -54,6 +58,8 @@ public class Factory {
         caches.put(TEXT_ANIM, TextAnimActivity.class);
         caches.put(TEXT_TREE_GROW, TreeGrowActivity.class);
         caches.put(LIGHTING, LightingActivity.class);
+        caches.put(HEXA, HexaActivity.class);
+        caches.put(TREE, TreeActivity.class);
     }
 
     public static Class create(String s) {

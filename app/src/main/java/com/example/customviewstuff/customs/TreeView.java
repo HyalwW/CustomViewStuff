@@ -15,34 +15,31 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Created by Wang.Wenhui
- * Date: 2020/4/2
+ * Description:BFS
  */
-public class LightingView extends BaseSurfaceView {
-    //闪电形成时间
-    private static final long GROW_TIME = 40;
-    //闪电持续时间
-    private static final long SHOW_TIME = 1000;
-    //闪电消失时间
+public class TreeView extends BaseSurfaceView {
+    private static final long GROW_TIME = 50;
+    private static final long SHOW_TIME = 10000;
     private static final long DISAPPEAR_TIME = 150;
     private static long DURATION = GROW_TIME + SHOW_TIME + DISAPPEAR_TIME;
     private Random random;
     private List<Lighting> lightings;
     private static final float pi = (float) Math.PI;
-    private float getChildProb = 0.28f;
+    private float getChildProb = 0.12f;
     private Path drawPath;
     private LightingPool pool;
-    private boolean shine;
+    private float minX, maxX;
+    private boolean grow;
 
-    public LightingView(Context context) {
+    public TreeView(Context context) {
         super(context);
     }
 
-    public LightingView(Context context, AttributeSet attrs) {
+    public TreeView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public LightingView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TreeView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -58,7 +55,7 @@ public class LightingView extends BaseSurfaceView {
 
     @Override
     protected void onReady() {
-        shine = true;
+        grow = true;
         start();
     }
 
@@ -66,24 +63,24 @@ public class LightingView extends BaseSurfaceView {
         lightings.clear();
         lightings.add(createRoot());
         doInThread(() -> {
-            while (shine) {
+            while (grow) {
                 for (Lighting lighting : lightings) {
                     if (lighting.move() && !lighting.hasChild) {
                         lighting.hasChild = true;
                         if (lighting.serial > 1) {
                             Lighting sl = pool.get();
-                            sl.set(lighting.ex, lighting.ey, sameLevelAngle(lighting.angle), lighting.level, lighting.serial - 1, childWidth(lighting, true), childLength(lighting.length, true));
+                            sl.set(lighting.ex, lighting.ey, sameLevelAngle(lighting.angle), lighting.level, lighting.serial - 1, lighting.width * 0.9f, childLength(lighting.length, true));
                             lightings.add(sl);
                         }
-                        if (lighting.level < 4) {
+                        if (lighting.level < 7) {
                             if (random.nextFloat() > getChildProb * lighting.level) {
                                 Lighting lc = pool.get();
-                                lc.set(lighting.ex, lighting.ey, childAngle(lighting.angle, false), lighting.level + 1, getSerial(lighting.level + 1), childWidth(lighting, false), childLength(lighting.length, false));
+                                lc.set(lighting.ex, lighting.ey, childAngle(lighting.angle, false), lighting.level + 1, getSerial(lighting.level + 1), lighting.width * 0.8f, childLength(lighting.length, false));
                                 lightings.add(lc);
                             }
                             if (random.nextFloat() > getChildProb * lighting.level) {
                                 Lighting rc = pool.get();
-                                rc.set(lighting.ex, lighting.ey, childAngle(lighting.angle, true), lighting.level + 1, getSerial(lighting.level + 1), childWidth(lighting, false), childLength(lighting.length, false));
+                                rc.set(lighting.ex, lighting.ey, childAngle(lighting.angle, true), lighting.level + 1, getSerial(lighting.level + 1), lighting.width * 0.8f, childLength(lighting.length, false));
                                 lightings.add(rc);
                             }
                         }
@@ -97,29 +94,26 @@ public class LightingView extends BaseSurfaceView {
                     lightings.add(createRoot());
                 }
                 callDraw("lighting");
-                sleep(10);
+                sleep(UPDATE_RATE);
             }
         });
     }
 
-    private float childWidth(Lighting lighting, boolean isSame) {
-        return isSame ? lighting.width * 0.8f + lighting.width * 0.1f * random.nextFloat() :
-                lighting.width * 0.5f + lighting.width * 0.2f * random.nextFloat();
-    }
-
     private Lighting createRoot() {
+        minX = 0;
+        maxX = getMeasuredWidth();
         Lighting root = pool.get();
-        root.set(getMeasuredWidth() >> 1, 0, pi / 2, 1, 7, getMeasuredWidth() * 0.016f, getMeasuredHeight() * 0.1f);
+        root.set(getMeasuredWidth() >> 1, getMeasuredHeight(), -pi / 2, 1, 7, getMeasuredWidth() * 0.02f, getMeasuredHeight() * 0.15f);
         return root;
     }
 
     private float childLength(float length, boolean isSame) {
-        return isSame ? length * 0.9f + length * 0.1f * random.nextFloat()
-                : length * 0.3f + length * 0.15f * random.nextFloat();
+        return isSame ? length * 0.8f + length * 0.15f * random.nextFloat()
+                : length * 0.5f + length * 0.2f * random.nextFloat();
     }
 
     private int getSerial(int level) {
-        return 6 + level;
+        return 7 - level;
     }
 
     private float childAngle(float angle, boolean isRight) {
@@ -142,20 +136,22 @@ public class LightingView extends BaseSurfaceView {
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        super.surfaceDestroyed(holder);
-        shine = false;
-    }
-
-    @Override
     protected void draw(Canvas canvas, Object data) {
         if (data instanceof String) {
+            if (maxX - minX > getMeasuredWidth()) {
+                canvas.scale(getMeasuredWidth() / (maxX - minX), getMeasuredWidth() / (maxX - minX), getMeasuredWidth() >> 1, getMeasuredHeight());
+            }
             for (Lighting lighting : lightings) {
+                if (lighting.color != 0) {
+                    mPaint.setColor(lighting.color);
+                } else {
+                    mPaint.setColor(Color.WHITE);
+                }
                 mPaint.setAlpha((int) (255 * lighting.alpha));
                 drawPath.reset();
                 drawPath.moveTo(lighting.sx, lighting.sy);
                 drawPath.lineTo(lighting.ex, lighting.ey);
-                mPaint.setStrokeWidth(lighting.level == 1 ? getMeasuredWidth() * 0.02f : lighting.width);
+                mPaint.setStrokeWidth(lighting.width);
                 canvas.drawPath(drawPath, mPaint);
             }
         }
@@ -171,6 +167,12 @@ public class LightingView extends BaseSurfaceView {
         return false;
     }
 
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        super.surfaceDestroyed(holder);
+        grow = false;
+    }
+
     private class Lighting {
         private float angle;
         float sx, sy, ex, ey;
@@ -178,6 +180,7 @@ public class LightingView extends BaseSurfaceView {
         long time;
         float length, width, alpha;
         boolean hasChild;
+        int color;
 
         Lighting() {
         }
@@ -185,6 +188,8 @@ public class LightingView extends BaseSurfaceView {
         void set(float sx, float sy, float angle, int level, int serial, float width, float length) {
             this.ex = this.sx = sx;
             this.ey = this.sy = sy;
+            minX = Math.min(minX, ex);
+            maxX = Math.max(maxX, ex);
             this.angle = angle;
             this.level = level;
             this.serial = serial;
@@ -193,9 +198,15 @@ public class LightingView extends BaseSurfaceView {
             hasChild = false;
             time = 0;
             alpha = 1;
+            if (level > 5) {
+                color = randomColor();
+            }
         }
 
         boolean move() {
+            if (time > DURATION) {
+                return false;
+            }
             float trueLen = (float) time / GROW_TIME * length;
             if (time >= GROW_TIME) {
                 trueLen = length;
@@ -205,9 +216,15 @@ public class LightingView extends BaseSurfaceView {
             }
             this.ex = (float) (trueLen * Math.cos(angle) + sx);
             this.ey = (float) (trueLen * Math.sin(angle) + sy);
-            time += 10;
+            minX = Math.min(minX, ex);
+            maxX = Math.max(maxX, ex);
+            time += UPDATE_RATE;
             return time > GROW_TIME;
         }
+    }
+
+    private int randomColor() {
+        return Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
     }
 
     private class LightingPool {

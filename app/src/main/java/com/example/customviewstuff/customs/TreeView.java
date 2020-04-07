@@ -7,8 +7,9 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.SparseArray;
 import android.view.SurfaceHolder;
+
+import com.example.customviewstuff.Pool;
 
 import java.util.List;
 import java.util.Random;
@@ -27,7 +28,7 @@ public class TreeView extends BaseSurfaceView {
     private static final float pi = (float) Math.PI;
     private float getChildProb = 0.12f;
     private Path drawPath;
-    private LightingPool pool;
+    private Pool<Lighting> pool;
     private float minX, maxX;
     private boolean grow;
 
@@ -50,7 +51,22 @@ public class TreeView extends BaseSurfaceView {
         mPaint.setColor(Color.WHITE);
         mPaint.setStyle(Paint.Style.STROKE);
         drawPath = new Path();
-        pool = new LightingPool();
+        pool = new Pool<>(2000, new Pool.Creator<Lighting>() {
+            @Override
+            public Lighting instance() {
+                return new Lighting();
+            }
+
+            @Override
+            public void reset(Lighting lighting) {
+
+            }
+
+            @Override
+            public boolean isLeisure(Lighting lighting) {
+                return lighting.time > DURATION;
+            }
+        });
     }
 
     @Override
@@ -227,22 +243,4 @@ public class TreeView extends BaseSurfaceView {
         return Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
     }
 
-    private class LightingPool {
-        private SparseArray<Lighting> pools;
-
-        LightingPool() {
-            pools = new SparseArray<>();
-        }
-
-        public synchronized Lighting get() {
-            for (int i = 0; i < pools.size(); i++) {
-                if (pools.valueAt(i).time > DURATION + 10) {
-                    return pools.valueAt(i);
-                }
-            }
-            Lighting lighting = new Lighting();
-            pools.put(pools.size(), lighting);
-            return lighting;
-        }
-    }
 }

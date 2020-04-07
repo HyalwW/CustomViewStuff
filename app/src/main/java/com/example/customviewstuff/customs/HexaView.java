@@ -9,8 +9,9 @@ import android.graphics.PathMeasure;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.SparseArray;
 import android.view.SurfaceHolder;
+
+import com.example.customviewstuff.Pool;
 
 import java.util.List;
 import java.util.Random;
@@ -25,7 +26,7 @@ public class HexaView extends BaseSurfaceView {
     private Path drawPath;
     private List<Route> routes;
     private boolean draw;
-    private RoutePool pool;
+    private Pool<Route> pool;
 
     public HexaView(Context context) {
         super(context);
@@ -45,7 +46,22 @@ public class HexaView extends BaseSurfaceView {
         measure = new PathMeasure();
         random = new Random();
         routes = new CopyOnWriteArrayList<>();
-        pool = new RoutePool();
+        pool = new Pool<>(new Pool.Creator<Route>() {
+            @Override
+            public Route instance() {
+                return new Route();
+            }
+
+            @Override
+            public void reset(Route route) {
+                route.reset();
+            }
+
+            @Override
+            public boolean isLeisure(Route route) {
+                return route.pos > route.total;
+            }
+        });
 
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -163,24 +179,4 @@ public class HexaView extends BaseSurfaceView {
         return Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
     }
 
-    private class RoutePool {
-        private SparseArray<Route> pools;
-
-        RoutePool() {
-            pools = new SparseArray<>();
-        }
-
-        Route get() {
-            for (int i = 0; i < pools.size(); i++) {
-                Route route = pools.valueAt(i);
-                if (route.pos > route.total) {
-                    route.reset();
-                    return route;
-                }
-            }
-            Route r = new Route();
-            pools.put(pools.size(), r);
-            return r;
-        }
-    }
 }

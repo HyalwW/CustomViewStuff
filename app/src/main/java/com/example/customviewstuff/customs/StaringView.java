@@ -3,6 +3,7 @@ package com.example.customviewstuff.customs;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.Shader;
@@ -16,6 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class StaringView extends BaseSurfaceView {
     private Random random;
     private List<Star> stars;
+    private List<Line> lines;
     private float length, radius;
     private float scaleIncrement;
 
@@ -35,6 +37,7 @@ public class StaringView extends BaseSurfaceView {
     protected void onInit() {
         random = new Random();
         stars = new CopyOnWriteArrayList<>();
+        lines = new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -47,16 +50,19 @@ public class StaringView extends BaseSurfaceView {
 
     @Override
     protected void onDataUpdate() {
-        while (stars.size() < 200) {
+        while (stars.size() < 400) {
             stars.add(new Star());
         }
+        while (lines.size() < 30) {
+            lines.add(new Line());
+        }
         if (touching) {
-            if (scaleIncrement < 0.02f) {
-                scaleIncrement += 0.0005f;
+            if (scaleIncrement < 0.5f) {
+                scaleIncrement += 0.0003f;
             }
         } else {
             if (scaleIncrement > 0) {
-                scaleIncrement -= 0.0006f;
+                scaleIncrement -= 0.0005f;
             } else {
                 scaleIncrement = 0;
             }
@@ -64,11 +70,15 @@ public class StaringView extends BaseSurfaceView {
         for (Star star : stars) {
             star.move();
         }
+        for (Line line : lines) {
+            line.move();
+        }
+        Line l = lines.get(0);
     }
 
     @Override
     protected void onRefresh(Canvas canvas) {
-        mPaint.setShader(null);
+        mPaint.setStyle(Paint.Style.FILL);
         for (Star star : stars) {
             mPaint.setColor(star.color);
             float[] pos = star.getPos();
@@ -77,6 +87,13 @@ public class StaringView extends BaseSurfaceView {
                 mPaint.setShader(new RadialGradient(pos[0], pos[1], r, star.color, Color.TRANSPARENT, Shader.TileMode.CLAMP));
             }
             canvas.drawCircle(pos[0], pos[1], r, mPaint);
+        }
+        mPaint.setShader(null);
+        mPaint.setColor(Color.WHITE);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(getMeasuredWidth() * 0.003f);
+        for (Line line : lines) {
+            canvas.drawLine(line.sx, line.sy, line.ex, line.ey, mPaint);
         }
     }
 
@@ -114,7 +131,7 @@ public class StaringView extends BaseSurfaceView {
             ex = (float) (length * Math.cos(a) + (getMeasuredWidth() >> 1));
             ey = (float) (length * Math.sin(a) + (getMeasuredHeight() >> 1));
             scale = 0f;
-            maxScale = 1f + (length - l) / length * 3f;
+            maxScale = 1f + (length - l) / length * 2f;
             increment = 0;
             color = randomColor();
         }
@@ -135,7 +152,7 @@ public class StaringView extends BaseSurfaceView {
                 increment += 0.0015f;
             } else {
                 if (increment > 0) {
-                    increment -= 0.0006f;
+                    increment -= 0.0005f;
                 } else {
                     increment = 0;
                 }
@@ -146,6 +163,47 @@ public class StaringView extends BaseSurfaceView {
 
     private int randomColor() {
         return Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+    }
+
+    private class Line {
+        float ml;
+        float angle;
+        float sx, sy, ex, ey;
+        float increment;
+
+        Line() {
+            reset();
+        }
+
+        void reset() {
+            ml = length * 0.8f * random.nextFloat();
+            angle = (float) (Math.PI * 2 * random.nextFloat());
+            ex = sx = (float) (ml * Math.cos(angle) + (getMeasuredWidth() >> 1));
+            ey = sy = (float) (ml * Math.sin(angle) + (getMeasuredHeight() >> 1));
+            increment = 0;
+        }
+
+        void move() {
+            if (ml > length) {
+                reset();
+                return;
+            }
+            if (touching) {
+                increment += length * 0.01f * scaleIncrement;
+            } else {
+                if (increment > 0) {
+                    increment -= 0.02f;
+                } else {
+                    increment = 0;
+                }
+            }
+            ml += increment;
+            sx = (float) (ml * Math.cos(angle) + (getMeasuredWidth() >> 1));
+            sy = (float) (ml * Math.sin(angle) + (getMeasuredHeight() >> 1));
+            float el = ml + increment * 10;
+            ex = (float) (el * Math.cos(angle) + (getMeasuredWidth() >> 1));
+            ey = (float) (el * Math.sin(angle) + (getMeasuredHeight() >> 1));
+        }
     }
 
     private boolean touching;

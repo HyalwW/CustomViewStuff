@@ -42,7 +42,7 @@ public class Factory {
     private static final String TREE = "成长的树（广度优先）";
     private static final String LIGHTING = "闪电";
     private static final String HEXA = "六边形";
-    private static final String STAR = "穿越";
+    private static final String STAR = "星际穿越";
 
     static {
         caches = new HashMap<>();

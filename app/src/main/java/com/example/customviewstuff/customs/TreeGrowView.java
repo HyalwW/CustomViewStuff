@@ -30,7 +30,6 @@ public class TreeGrowView extends BaseSurfaceView {
     private boolean isDestroy;
     private Path path, src, drawPath;
     private float minHeight, maxHeight;
-    private boolean grow;
 
     public TreeGrowView(Context context) {
         super(context);
@@ -59,7 +58,6 @@ public class TreeGrowView extends BaseSurfaceView {
 
     @Override
     protected void onReady() {
-        grow = true;
         restart();
     }
 
@@ -85,7 +83,6 @@ public class TreeGrowView extends BaseSurfaceView {
     }
 
     private void draw(TreeNode node) {
-        if (!grow) return;
         if (node.time == 0) {
             while (node.time < duration && !isDestroy) {
                 node.time += 16;
@@ -211,12 +208,6 @@ public class TreeGrowView extends BaseSurfaceView {
     @Override
     protected boolean preventClear() {
         return false;
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        super.surfaceChanged(holder, format, width, height);
-        grow = false;
     }
 
     private class TreeNode {

@@ -9,6 +9,7 @@ import com.example.customviewstuff.activities.LightingActivity;
 import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
+import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;
 import com.example.customviewstuff.activities.TimeActivity;
 import com.example.customviewstuff.activities.TreeActivity;
@@ -41,6 +42,7 @@ public class Factory {
     private static final String TREE = "成长的树（广度优先）";
     private static final String LIGHTING = "闪电";
     private static final String HEXA = "六边形";
+    private static final String STAR = "穿越";
 
     static {
         caches = new HashMap<>();
@@ -60,6 +62,7 @@ public class Factory {
         caches.put(LIGHTING, LightingActivity.class);
         caches.put(HEXA, HexaActivity.class);
         caches.put(TREE, TreeActivity.class);
+        caches.put(STAR, StaringActivity.class);
     }
 
     public static Class create(String s) {

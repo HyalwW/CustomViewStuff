@@ -9,6 +9,7 @@ import com.example.customviewstuff.activities.LightingActivity;
 import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
+import com.example.customviewstuff.activities.SnakeActivity;
 import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;
 import com.example.customviewstuff.activities.TimeActivity;
@@ -63,6 +64,7 @@ public class Factory {
         caches.put(HEXA, HexaActivity.class);
         caches.put(TREE, TreeActivity.class);
         caches.put(STAR, StaringActivity.class);
+        caches.put("玩蛇", SnakeActivity.class);
     }
 
     public static Class create(String s) {

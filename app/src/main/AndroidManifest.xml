@@ -20,7 +20,10 @@
             android:name=".activities.TreeGrowActivity"
             android:screenOrientation="landscape" />
         <activity android:name=".activities.StaringActivity" />
-        <activity android:name=".activities.TreeActivity" />
+        <activity
+            android:name=".activities.TreeActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.SnakeActivity" />
         <activity android:name=".activities.HexaActivity" />
         <activity android:name=".activities.LightingActivity" />
         <activity android:name=".activities.TextAnimActivity" />

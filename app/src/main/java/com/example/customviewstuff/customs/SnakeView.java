@@ -1,6 +1,8 @@
 package com.example.customviewstuff.customs;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -9,8 +11,9 @@ import android.graphics.PathMeasure;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
+
+import com.example.customviewstuff.R;
 
 import java.util.Random;
 
@@ -19,13 +22,15 @@ import java.util.Random;
  * Date: 2020/4/15
  */
 public class SnakeView extends BaseSurfaceView {
-    private Path snakePath, drawPath;
-    private PathMeasure measure;
+    private Path snakePath, drawPath, equalPath;
+    private PathMeasure measure, equalMeasure;
     private float baseLength, length;
-    private static final float LINE_LIMIT = 50f;
     private PointF lastP, food;
     private boolean isStart;
     private Random random;
+    private float headAngle;
+    private Bitmap head;
+    private Rect headDst;
 
     public SnakeView(Context context) {
         super(context);
@@ -43,20 +48,24 @@ public class SnakeView extends BaseSurfaceView {
     protected void onInit() {
         snakePath = new Path();
         drawPath = new Path();
+        equalPath = new Path();
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setColor(Color.WHITE);
         measure = new PathMeasure();
+        equalMeasure = new PathMeasure();
         lastP = new PointF();
         food = new PointF();
         random = new Random();
+        head = BitmapFactory.decodeResource(getResources(), R.drawable.snake);
+        headDst = new Rect();
     }
 
     @Override
     protected void onReady() {
         baseLength = Math.min(getMeasuredHeight(), getMeasuredWidth());
-        mPaint.setStrokeWidth(baseLength * 0.03f);
+        mPaint.setStrokeWidth(baseLength * 0.032f);
         if (snakePath.isEmpty()) {
             reset();
         }
@@ -84,7 +93,6 @@ public class SnakeView extends BaseSurfaceView {
         if (length <= 0) {
             length = 0;
             reset();
-            Log.e("wwh", "SnakeView --> onDataUpdate: reset");
             return;
         }
         if (isStart) {
@@ -93,16 +101,25 @@ public class SnakeView extends BaseSurfaceView {
         drawPath.reset();
         measure.setPath(snakePath, false);
         measure.getSegment(measure.getLength() - length, measure.getLength(), drawPath, true);
+        float[] tan = new float[2];
+        measure.getPosTan(measure.getLength(), null, tan);
+        headAngle = (float) (Math.atan2(tan[1], tan[0]) * 180 / Math.PI) - 90;
     }
 
     @Override
     protected void onRefresh(Canvas canvas) {
         mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(Color.WHITE);
+        mPaint.setColor(0xFFFF4500);
         canvas.drawPath(drawPath, mPaint);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(Color.RED);
         canvas.drawCircle(food.x, food.y, 20, mPaint);
+        canvas.rotate(headAngle, lastP.x, lastP.y);
+        headDst.set(((int) (lastP.x - head.getWidth() / 2)),
+                ((int) (lastP.y - head.getHeight() / 2)),
+                ((int) (lastP.x + head.getWidth() / 2)),
+                ((int) (lastP.y + head.getHeight() / 2)));
+        canvas.drawBitmap(head, null, headDst, mPaint);
     }
 
     @Override
@@ -133,12 +150,16 @@ public class SnakeView extends BaseSurfaceView {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (canLine(x, y)) {
-                    snakePath.lineTo(x, y);
-                    if (feed(x, y)) {
-                        randomFood();
-                        length += baseLength * 0.15f;
+                    if (eatSelf(x, y)) {
+                        reset();
+                    } else {
+                        snakePath.lineTo(x, y);
+                        if (feed(x, y)) {
+                            randomFood();
+                            length += baseLength * 0.15f;
+                        }
+                        lastP.set(x, y);
                     }
-                    lastP.set(x, y);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -148,11 +169,34 @@ public class SnakeView extends BaseSurfaceView {
         return true;
     }
 
+    private boolean eatSelf(float x, float y) {
+        if (!drawPath.isEmpty()) {
+            equalPath.reset();
+            equalPath.addPath(drawPath);
+            equalMeasure.setPath(equalPath, false);
+            float len = 0;
+            float[] pos = new float[2];
+            while (len < equalMeasure.getLength() - 10f) {
+                equalMeasure.getPosTan(len, pos, null);
+                if (distance(x, y, pos[0], pos[1]) < 10f) {
+                    return true;
+                }
+                len += 10f;
+            }
+        }
+        return false;
+    }
+
     private boolean canLine(float x, float y) {
-        return Math.sqrt((lastP.x - x) * (lastP.x - x) + (lastP.y - y) * (lastP.y - y)) <= LINE_LIMIT;
+        double dis = distance(x, y, lastP.x, lastP.y);
+        return dis <= 40 && dis >= 7;
     }
 
     private boolean feed(float x, float y) {
-        return Math.sqrt((food.x - x) * (food.x - x) + (food.y - y) * (food.y - y)) <= 20;
+        return distance(x, y, food.x, food.y) <= 20;
+    }
+
+    private float distance(float x1, float y1, float x2, float y2) {
+        return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 }

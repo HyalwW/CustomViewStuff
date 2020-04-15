@@ -154,8 +154,10 @@ public class TreeView extends BaseSurfaceView {
     @Override
     protected void draw(Canvas canvas, Object data) {
         if (data instanceof String) {
-            if (maxX - minX > getMeasuredWidth()) {
-                canvas.scale(getMeasuredWidth() / (maxX - minX), getMeasuredWidth() / (maxX - minX), getMeasuredWidth() >> 1, getMeasuredHeight());
+            if (maxX > getMeasuredWidth() || minX < 0) {
+                float half = getMeasuredWidth() >> 1;
+                float scale = Math.min(half / (half - minX), half / (maxX - half));
+                canvas.scale(scale, scale, getMeasuredWidth() >> 1, getMeasuredHeight());
             }
             for (Lighting lighting : lightings) {
                 if (lighting.color != 0) {

@@ -189,11 +189,11 @@ public class SnakeView extends BaseSurfaceView {
 
     private boolean canLine(float x, float y) {
         double dis = distance(x, y, lastP.x, lastP.y);
-        return dis <= 40 && dis >= 7;
+        return dis <= 60 && dis >= 7;
     }
 
     private boolean feed(float x, float y) {
-        return distance(x, y, food.x, food.y) <= 20;
+        return distance(x, y, food.x, food.y) <= 30;
     }
 
     private float distance(float x1, float y1, float x2, float y2) {

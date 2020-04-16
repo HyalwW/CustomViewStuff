@@ -17,12 +17,15 @@
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".activities.EventDispatchActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.TreeGrowActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".activities.StaringActivity" />
         <activity
             android:name=".activities.TreeActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".activities.StaringActivity" />
         <activity android:name=".activities.SnakeActivity" />
         <activity android:name=".activities.HexaActivity" />
         <activity android:name=".activities.LightingActivity" />

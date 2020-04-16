@@ -2,6 +2,7 @@ package com.example.customviewstuff;
 
 import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
+import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.HexaActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
@@ -44,6 +45,8 @@ public class Factory {
     private static final String LIGHTING = "闪电";
     private static final String HEXA = "六边形";
     private static final String STAR = "星际穿越";
+    private static final String SNAKE = "玩蛇";
+    private static final String EVENT_DISPATCH = "事件分发";
 
     static {
         caches = new HashMap<>();
@@ -64,7 +67,8 @@ public class Factory {
         caches.put(HEXA, HexaActivity.class);
         caches.put(TREE, TreeActivity.class);
         caches.put(STAR, StaringActivity.class);
-        caches.put("玩蛇", SnakeActivity.class);
+        caches.put(SNAKE, SnakeActivity.class);
+        caches.put(EVENT_DISPATCH, EventDispatchActivity.class);
     }
 
     public static Class create(String s) {

@@ -111,6 +111,8 @@ public class EventDispatchActivity extends BaseActivity<ActivityEventDispatchBin
         return list;
     }
 
+    private float lx, ly;
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getY() >= dataBinding.drawView.getTop()) {
@@ -119,9 +121,17 @@ public class EventDispatchActivity extends BaseActivity<ActivityEventDispatchBin
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 dataBinding.drawView.action("ACTION_DOWN");
+                lx = ev.getRawX();
+                ly = ev.getRawY();
                 break;
             case MotionEvent.ACTION_MOVE:
-                dataBinding.drawView.action("ACTION_MOVE");
+                if (distance(ev.getRawX(), ev.getRawY(), lx, ly) >= 15) {
+                    dataBinding.drawView.action("ACTION_MOVE");
+                    lx = ev.getRawX();
+                    ly = ev.getRawY();
+                } else {
+                    return true;
+                }
                 break;
             case MotionEvent.ACTION_UP:
                 dataBinding.drawView.action("ACTION_UP");
@@ -137,6 +147,10 @@ public class EventDispatchActivity extends BaseActivity<ActivityEventDispatchBin
             default:
                 return super.dispatchTouchEvent(ev);
         }
+    }
+
+    private float distance(float sx, float sy, float ex, float ey) {
+        return (float) Math.sqrt((sx - ex) * (sx - ex) + (sy - ey) * (sy - ey));
     }
 
     @Override

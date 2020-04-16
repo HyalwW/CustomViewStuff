@@ -34,6 +34,7 @@ public class EventDispatchView extends BaseSurfaceView {
     private Rect drawRect, moveRect;
     private String action;
     private long time, duration = 2000;
+    private float hw, hh;
 
     public EventDispatchView(Context context) {
         super(context);
@@ -77,6 +78,8 @@ public class EventDispatchView extends BaseSurfaceView {
             Container vOnTouch = new Container(VO, getMeasuredWidth() * 0.8f, getMeasuredHeight() * 0.8f);
             containers.add(vOnTouch);
         }
+        hw = getMeasuredWidth() * 0.14f;
+        hh = getMeasuredWidth() * 0.05f;
         startAnim();
     }
 
@@ -103,8 +106,6 @@ public class EventDispatchView extends BaseSurfaceView {
         canvas.drawPath(drawPath, mPaint);
         mPaint.setStyle(Paint.Style.FILL);
         for (Container container : containers) {
-            float hw = getMeasuredWidth() * 0.14f;
-            float hh = getMeasuredWidth() * 0.05f;
             boolean save = false;
             if (moveContainer && moveIndex == containers.indexOf(container)) {
                 canvas.save();
@@ -179,8 +180,6 @@ public class EventDispatchView extends BaseSurfaceView {
         }
 
         public Rect getRect() {
-            float hw = getMeasuredWidth() * 0.14f;
-            float hh = getMeasuredWidth() * 0.05f;
             moveRect.set((int) (x - hw), (int) (y - hh), (int) (x + hw), (int) (y + hh));
             return moveRect;
         }
@@ -245,7 +244,22 @@ public class EventDispatchView extends BaseSurfaceView {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                moveContainer = false;
+                if (moveContainer) {
+                    Container container = containers.get(moveIndex);
+                    if (container.x < hw) {
+                        container.x = hw;
+                    }
+                    if (container.x > getMeasuredWidth() - hw) {
+                        container.x = getMeasuredWidth() - hw;
+                    }
+                    if (container.y > getMeasuredHeight() - hh) {
+                        container.y = getMeasuredHeight() - hh;
+                    }
+                    if (container.y < hh) {
+                        container.y = hh;
+                    }
+                    moveContainer = false;
+                }
                 break;
         }
         return true;

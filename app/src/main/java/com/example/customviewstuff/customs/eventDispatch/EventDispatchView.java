@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 import com.example.customviewstuff.customs.BaseSurfaceView;
 
@@ -30,7 +31,7 @@ public class EventDispatchView extends BaseSurfaceView {
     public static final String VGO = "viewGroup OnTouch";
     public static final String VD = "view Dispatch";
     public static final String VO = "view OnTouch";
-    private Rect drawRect;
+    private Rect drawRect, moveRect;
     private String action;
     private long time, duration = 2000;
 
@@ -54,6 +55,7 @@ public class EventDispatchView extends BaseSurfaceView {
         containers = new ArrayList<>();
         mPaint.setTextAlign(Paint.Align.CENTER);
         drawRect = new Rect();
+        moveRect = new Rect();
         action = "";
     }
 
@@ -100,15 +102,27 @@ public class EventDispatchView extends BaseSurfaceView {
         mPaint.setColor(Color.GREEN);
         canvas.drawPath(drawPath, mPaint);
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setTextSize(getMeasuredWidth() * 0.03f);
         for (Container container : containers) {
             float hw = getMeasuredWidth() * 0.14f;
             float hh = getMeasuredWidth() * 0.05f;
+            boolean save = false;
+            if (moveContainer && moveIndex == containers.indexOf(container)) {
+                canvas.save();
+                save = true;
+                canvas.scale(1.2f, 1.2f, container.x, container.y);
+            }
             drawRect.set(((int) (container.x - hw)), ((int) (container.y - hh)), ((int) (container.x + hw)), (int) (container.y + hh));
             mPaint.setColor(container.onEvent ? Color.YELLOW : Color.RED);
             canvas.drawRect(drawRect, mPaint);
+            mPaint.setTextSize(getMeasuredWidth() * 0.03f);
             mPaint.setColor(Color.BLUE);
             canvas.drawText(container.name, drawRect.left + hw, drawRect.bottom - hh + mPaint.getTextSize() / 2, mPaint);
+            mPaint.setTextSize(getMeasuredWidth() * 0.02f);
+            mPaint.setColor(Color.BLACK);
+            canvas.drawText(container.returnType, drawRect.left + hw, drawRect.bottom - hh - mPaint.getTextSize(), mPaint);
+            if (save) {
+                canvas.restore();
+            }
         }
     }
 
@@ -127,8 +141,28 @@ public class EventDispatchView extends BaseSurfaceView {
         return false;
     }
 
+    public void resetType(String name, ReturnType type) {
+        reset();
+        for (Container container : containers) {
+            if (container.name.equals(name)) {
+                switch (type) {
+                    case TRUE:
+                        container.returnType = "true";
+                        break;
+                    case FALSE:
+                        container.returnType = "false";
+                        break;
+                    case SUPER:
+                        container.returnType = "super";
+                        break;
+                }
+                return;
+            }
+        }
+    }
+
     private class Container {
-        String name;
+        String name, returnType;
         boolean onEvent;
         float x, y;
 
@@ -136,11 +170,19 @@ public class EventDispatchView extends BaseSurfaceView {
             this.name = name;
             this.x = x;
             this.y = y;
+            returnType = "super";
             reset();
         }
 
         void reset() {
             onEvent = false;
+        }
+
+        public Rect getRect() {
+            float hw = getMeasuredWidth() * 0.14f;
+            float hh = getMeasuredWidth() * 0.05f;
+            moveRect.set((int) (x - hw), (int) (y - hh), (int) (x + hw), (int) (y + hh));
+            return moveRect;
         }
     }
 
@@ -170,5 +212,42 @@ public class EventDispatchView extends BaseSurfaceView {
                 return;
             }
         }
+    }
+
+    private float sx, sy;
+    private boolean moveContainer;
+    private int moveIndex;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                moveContainer = false;
+                sx = event.getX();
+                sy = event.getY();
+                for (Container container : containers) {
+                    if (container.getRect().contains((int) sx, (int) sy)) {
+                        moveContainer = true;
+                        moveIndex = containers.indexOf(container);
+                        reset();
+                        break;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (moveContainer) {
+                    Container container = containers.get(moveIndex);
+                    container.x += event.getX() - sx;
+                    container.y += event.getY() - sy;
+                    sx = event.getX();
+                    sy = event.getY();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                moveContainer = false;
+                break;
+        }
+        return true;
     }
 }

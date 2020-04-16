@@ -73,7 +73,7 @@ public class EventDispatchActivity extends BaseActivity<ActivityEventDispatchBin
         List<SetAdapter.Bean> list = getList();
         adapter.setList(list);
         adapter.setListener((name, type) -> {
-            dataBinding.drawView.reset();
+            dataBinding.drawView.resetType(name, type);
             switch (name) {
                 case EventDispatchView.AD:
                 case EventDispatchView.AO:

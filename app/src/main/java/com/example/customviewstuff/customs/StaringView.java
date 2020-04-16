@@ -189,7 +189,7 @@ public class StaringView extends BaseSurfaceView {
                 return;
             }
             if (touching) {
-                increment += length * 0.01f * scaleIncrement;
+                increment += length * 0.04f * scaleIncrement;
             } else {
                 if (increment > 0) {
                     increment -= 0.02f;

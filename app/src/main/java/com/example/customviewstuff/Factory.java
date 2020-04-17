@@ -12,6 +12,7 @@ import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.SnakeActivity;
 import com.example.customviewstuff.activities.StaringActivity;
+import com.example.customviewstuff.activities.StayAwayActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;
 import com.example.customviewstuff.activities.TimeActivity;
 import com.example.customviewstuff.activities.TreeActivity;
@@ -47,6 +48,7 @@ public class Factory {
     private static final String STAR = "星际穿越";
     private static final String SNAKE = "玩蛇";
     private static final String EVENT_DISPATCH = "事件分发";
+    private static final String STAY_AWAY = "离我远点";
 
     static {
         caches = new HashMap<>();
@@ -69,6 +71,7 @@ public class Factory {
         caches.put(STAR, StaringActivity.class);
         caches.put(SNAKE, SnakeActivity.class);
         caches.put(EVENT_DISPATCH, EventDispatchActivity.class);
+        caches.put(STAY_AWAY, StayAwayActivity.class);
     }
 
     public static Class create(String s) {

@@ -3,6 +3,7 @@ package com.example.customviewstuff;
 import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
+import com.example.customviewstuff.activities.FrameActivity;
 import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.HexaActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
@@ -49,6 +50,7 @@ public class Factory {
     private static final String SNAKE = "玩蛇";
     private static final String EVENT_DISPATCH = "事件分发";
     private static final String STAY_AWAY = "离我远点";
+    private static final String FRAME = "gif";
 
     static {
         caches = new HashMap<>();
@@ -72,6 +74,7 @@ public class Factory {
         caches.put(SNAKE, SnakeActivity.class);
         caches.put(EVENT_DISPATCH, EventDispatchActivity.class);
         caches.put(STAY_AWAY, StayAwayActivity.class);
+        caches.put(FRAME, FrameActivity.class);
     }
 
     public static Class create(String s) {

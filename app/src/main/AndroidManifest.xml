@@ -25,6 +25,7 @@
         <activity
             android:name=".activities.TreeActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".activities.FrameActivity" />
         <activity android:name=".activities.StayAwayActivity" />
         <activity android:name=".activities.StaringActivity" />
         <activity android:name=".activities.SnakeActivity" />

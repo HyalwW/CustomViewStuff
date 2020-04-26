@@ -22,6 +22,7 @@ public class StayAwayView extends BaseSurfaceView {
     private float triggleLen;
     private float px, py;
     private float increment;
+    private int type = 1;
 
     public StayAwayView(Context context) {
         super(context);
@@ -56,7 +57,11 @@ public class StayAwayView extends BaseSurfaceView {
     @Override
     protected void onDataUpdate() {
         for (Ball ball : balls) {
-            ball.runAway();
+            if (type == 0) {
+                ball.runAway();
+            } else if (type == 1) {
+                ball.scale();
+            }
         }
     }
 
@@ -84,7 +89,7 @@ public class StayAwayView extends BaseSurfaceView {
     }
 
     private class Ball {
-        float bx, by;
+        float bx, by, br;
         float length, maxLen;
         double angle;
         float x, y, radius;
@@ -98,7 +103,7 @@ public class StayAwayView extends BaseSurfaceView {
             color = randomColor();
             x = bx = randomX();
             y = by = randomY();
-            radius = randomRadius();
+            radius = br = randomRadius();
             for (Ball ball : balls) {
                 if (distance(ball.x, ball.y) <= radius + ball.radius) {
                     reset();
@@ -124,13 +129,30 @@ public class StayAwayView extends BaseSurfaceView {
                 }
             } else {
                 if (length > 0) {
-                    length -= increment * 0.1f;
+                    length -= increment * 0.5f * random.nextFloat();
                 } else {
                     length = 0;
                 }
             }
             x = (float) (bx + Math.cos(angle) * length);
             y = (float) (by + Math.sin(angle) * length);
+        }
+
+        void scale() {
+            if (pressed && distance(px, py) <= triggleLen) {
+                maxLen = br * 3f * (1 - distance(px, py) / triggleLen) + br;
+                if (radius < maxLen) {
+                    radius += increment * 0.5f;
+                } else if (radius > maxLen) {
+                    radius = maxLen;
+                }
+            } else {
+                if (radius > br) {
+                    radius -= increment * 0.1f;
+                } else {
+                    radius = br;
+                }
+            }
         }
     }
 

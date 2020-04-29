@@ -20,6 +20,7 @@ import com.example.customviewstuff.activities.TreeActivity;
 import com.example.customviewstuff.activities.TreeGrowActivity;
 import com.example.customviewstuff.activities.TriAngleActivity;
 import com.example.customviewstuff.activities.VideoActivity;
+import com.example.customviewstuff.activities.WaveTextActivity;
 import com.example.customviewstuff.activities.WebActivity;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class Factory {
     private static final String EVENT_DISPATCH = "事件分发";
     private static final String STAY_AWAY = "离我远点";
     private static final String FRAME = "gif";
+    private static final String WAVE_TEXT = "弹起的字";
 
     static {
         caches = new HashMap<>();
@@ -75,6 +77,7 @@ public class Factory {
         caches.put(EVENT_DISPATCH, EventDispatchActivity.class);
         caches.put(STAY_AWAY, StayAwayActivity.class);
         caches.put(FRAME, FrameActivity.class);
+        caches.put(WAVE_TEXT, WaveTextActivity.class);
     }
 
     public static Class create(String s) {

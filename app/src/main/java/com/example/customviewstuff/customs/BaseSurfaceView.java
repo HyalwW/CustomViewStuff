@@ -98,10 +98,8 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
         isDrawing = true;
         onDataUpdate();
         if (dirty != null) {
-            Log.e("wwh", "BaseSurfaceView --> drawEverything: " + dirty);
             Canvas canvas = holder.lockCanvas(dirty);
             //todo 第一次会出现问题
-            Log.e("wwh", "BaseSurfaceView --> drawEverything: " + dirty);
             if (canvas != null) {
                 if (!preventClear()) {
                     clearCanvas(canvas);

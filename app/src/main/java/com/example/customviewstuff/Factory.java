@@ -7,6 +7,7 @@ import com.example.customviewstuff.activities.FrameActivity;
 import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.HexaActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
+import com.example.customviewstuff.activities.JumpTextActivity;
 import com.example.customviewstuff.activities.LightingActivity;
 import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
@@ -23,10 +24,9 @@ import com.example.customviewstuff.activities.VideoActivity;
 import com.example.customviewstuff.activities.WaveTextActivity;
 import com.example.customviewstuff.activities.WebActivity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Factory {
     private static Map<String, Class> caches;
@@ -52,7 +52,8 @@ public class Factory {
     private static final String EVENT_DISPATCH = "事件分发";
     private static final String STAY_AWAY = "离我远点";
     private static final String FRAME = "gif";
-    private static final String WAVE_TEXT = "弹起的字";
+    private static final String WAVE_TEXT = "波状的字";
+    private static final String JUMP_TEXT = "弹起的字";
 
     static {
         caches = new HashMap<>();
@@ -77,6 +78,7 @@ public class Factory {
         caches.put(EVENT_DISPATCH, EventDispatchActivity.class);
         caches.put(STAY_AWAY, StayAwayActivity.class);
         caches.put(FRAME, FrameActivity.class);
+        caches.put(JUMP_TEXT, JumpTextActivity.class);
         caches.put(WAVE_TEXT, WaveTextActivity.class);
     }
 
@@ -89,11 +91,7 @@ public class Factory {
         return null;
     }
 
-    public static List<String> keys() {
-        List<String> s = new ArrayList<>();
-        for (Map.Entry<String, Class> entry : caches.entrySet()) {
-            s.add(entry.getKey());
-        }
-        return s;
+    public static Set<String> keys() {
+        return caches.keySet();
     }
 }

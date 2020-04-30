@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.WaveTextActivity" />
+        <activity android:name=".activities.WaveTextActivity"></activity>
+        <activity android:name=".activities.JumpTextActivity" />
         <activity
             android:name=".activities.EventDispatchActivity"
             android:screenOrientation="portrait" />

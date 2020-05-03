@@ -21,6 +21,7 @@ import com.example.customviewstuff.activities.TreeActivity;
 import com.example.customviewstuff.activities.TreeGrowActivity;
 import com.example.customviewstuff.activities.TriAngleActivity;
 import com.example.customviewstuff.activities.VideoActivity;
+import com.example.customviewstuff.activities.WaveActivity;
 import com.example.customviewstuff.activities.WaveTextActivity;
 import com.example.customviewstuff.activities.WebActivity;
 
@@ -54,6 +55,7 @@ public class Factory {
     private static final String FRAME = "gif";
     private static final String WAVE_TEXT = "波状的字";
     private static final String JUMP_TEXT = "弹起的字";
+    private static final String WAVE_WATER = "水波";
 
     static {
         caches = new HashMap<>();
@@ -80,6 +82,7 @@ public class Factory {
         caches.put(FRAME, FrameActivity.class);
         caches.put(JUMP_TEXT, JumpTextActivity.class);
         caches.put(WAVE_TEXT, WaveTextActivity.class);
+        caches.put(WAVE_WATER, WaveActivity.class);
     }
 
     public static Class create(String s) {

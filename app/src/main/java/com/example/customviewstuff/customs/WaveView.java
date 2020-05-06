@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Random;
 
 
+/**
+ * Description:水波view
+ */
 public class WaveView extends BaseSurfaceView {
     private List<Water> waters;
     private PointF breakPoint;
@@ -21,10 +24,11 @@ public class WaveView extends BaseSurfaceView {
     private boolean spreading, draw;
     private RectF drawRect;
     private Random random;
-    private static final int waterInLine = 20;
+    private static final int waterInLine = 30;
     private static final long duration = 2000;
     private static final float maxRadius = 1.2f;
     private static final double maxX = Math.PI * 9;
+    private int type;
 
     private Runnable drawRun = () -> {
         while (draw || spreading) {
@@ -45,6 +49,8 @@ public class WaveView extends BaseSurfaceView {
         }
         breakPoint.set(0, 0);
         range = 0;
+        type = type == 0 ? 1 : 0;
+        callDraw("draw");
     };
 
     public WaveView(Context context) {
@@ -103,11 +109,21 @@ public class WaveView extends BaseSurfaceView {
     @Override
     protected void draw(Canvas canvas, Object data) {
         for (Water water : waters) {
-            mPaint.setColor(water.color);
             drawRect.set(water.cx - water.currentRadius, water.cy - water.currentRadius, water.cx + water.currentRadius, water.cy + water.currentRadius);
-//            canvas.drawRect(drawRect, mPaint);
-            canvas.drawArc(drawRect, 0, 360, true, mPaint);
+            if (type == 0) {
+                mPaint.setColor(genColor(water));
+                canvas.drawRect(drawRect, mPaint);
+            } else {
+                mPaint.setColor(water.color);
+                canvas.drawArc(drawRect, 0, 360, true, mPaint);
+            }
         }
+    }
+
+    private int genColor(Water water) {
+        int c = 128;
+        c = (int) (c + 127 * Math.sin(water.currentX));
+        return Color.rgb(c, c, c);
     }
 
     @Override

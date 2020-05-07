@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class JumpTextView extends BaseSurfaceView {
     private float textSize;
-    private int textInLine = 20;
+    private int textInLine = 30;
     private String text;
     private float maxHeight;
     private int stopIndex;
@@ -40,8 +40,8 @@ public class JumpTextView extends BaseSurfaceView {
         hs = new CopyOnWriteArrayList<>();
         mPaint.setColor(Color.WHITE);
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 10; i++) {
-            builder.append("测试测试测试测试测试测试测试测测试测试测");
+        for (int i = 0; i < 8; i++) {
+            builder.append("测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试");
         }
         setText(builder.toString());
     }
@@ -62,7 +62,7 @@ public class JumpTextView extends BaseSurfaceView {
         for (int i = 0; i < stopIndex; i++) {
             double ff = hs.get(i);
             ff += Math.PI * UPDATE_RATE / duration;
-            if (ff - Math.PI > NEXT_DELAY * Math.PI / duration) {
+            if (ff - Math.PI > randomDelay() * Math.PI / duration) {
                 ff = 0;
             }
             hs.set(i, ff);
@@ -75,6 +75,10 @@ public class JumpTextView extends BaseSurfaceView {
                 gap = 0;
             }
         }
+    }
+
+    private double randomDelay() {
+        return 300 + Math.random() * 1000;
     }
 
     @Override

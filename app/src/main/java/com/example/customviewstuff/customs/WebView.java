@@ -65,7 +65,6 @@ public class WebView extends BaseSurfaceView {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                getParent().requestDisallowInterceptTouchEvent(true);
                 stopAnim();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -73,7 +72,6 @@ public class WebView extends BaseSurfaceView {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                getParent().requestDisallowInterceptTouchEvent(false);
                 startAnim();
                 break;
         }

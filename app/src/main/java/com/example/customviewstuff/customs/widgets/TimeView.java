@@ -1,4 +1,4 @@
-package com.example.customviewstuff.customs;
+package com.example.customviewstuff.customs.widgets;
 
 import android.content.Context;
 import android.content.res.AssetManager;

@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         tools:context=".activities.TimeActivity">
 
-        <com.example.customviewstuff.customs.TimeView
+        <com.example.customviewstuff.customs.widgets.TimeView
             android:id="@+id/t1"
             android:layout_width="300dp"
             android:layout_height="300dp"
@@ -23,7 +23,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.15" />
 
-        <com.example.customviewstuff.customs.FloatTimeView
+        <com.example.customviewstuff.customs.widgets.FloatTimeView
             android:id="@+id/t2"
             android:layout_width="300dp"
             android:layout_height="300dp"

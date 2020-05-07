@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.WaveActivity"></activity>
+        <activity android:name=".activities.SoccerActivity"></activity>
+        <activity android:name=".activities.WaveActivity" />
         <activity android:name=".activities.WaveTextActivity" />
         <activity android:name=".activities.JumpTextActivity" />
         <activity

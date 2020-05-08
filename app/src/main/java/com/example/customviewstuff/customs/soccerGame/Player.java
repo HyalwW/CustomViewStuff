@@ -35,7 +35,7 @@ public class Player {
 
     public void reset(float x, float y) {
         angle = 0;
-        isLeasure = false;
+        isLeasure = true;
         score = 0;
         this.x = x;
         this.y = y;
@@ -47,7 +47,7 @@ public class Player {
         runThread.start();
     }
 
-    private void stopRUn() {
+    public void stopRun() {
         isLeasure = true;
     }
 

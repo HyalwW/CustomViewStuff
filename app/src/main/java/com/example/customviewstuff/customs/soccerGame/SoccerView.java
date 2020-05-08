@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 
 import com.example.customviewstuff.customs.BaseSurfaceView;
 
@@ -177,6 +178,13 @@ public class SoccerView extends BaseSurfaceView {
     @Override
     protected boolean preventClear() {
         return false;
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        super.surfaceDestroyed(holder);
+        player1.stopRun();
+        player2.stopRun();
     }
 
     private float lastX, lastY;

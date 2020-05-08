@@ -47,7 +47,6 @@ public class SoccerView extends BaseSurfaceView {
 
     @Override
     protected void onReady() {
-        startAnim();
         ballRadius = getMeasuredWidth() * 0.02f;
         playerRadius = getMeasuredWidth() * 0.04f;
         player1.setPos(getMeasuredWidth() >> 1, getMeasuredHeight() * 0.8f);
@@ -55,6 +54,7 @@ public class SoccerView extends BaseSurfaceView {
         player2.setPos(getMeasuredWidth() >> 1, getMeasuredHeight() * 0.2f);
         player2.running();
         soccer.setPos(getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
+        startAnim();
     }
 
     @Override

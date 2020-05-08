@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="输入凭证" />
+
+    <EditText
+        android:id="@+id/edit"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:digits="123456789."
+        android:inputType="number"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:hint="输入主机ip" />
+
+    <com.example.customviewstuff.customs.DnmButton
+        android:id="@+id/ok"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="10dp"
+        android:text="确 定"
+        android:textSize="24sp" />
+</LinearLayout>

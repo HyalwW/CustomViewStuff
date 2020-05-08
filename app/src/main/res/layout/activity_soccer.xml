@@ -5,34 +5,63 @@
 
     <data>
 
+        <variable
+            name="command"
+            type="com.example.customviewstuff.activities.soccer.BindingCommand" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activities.SoccerActivity">
+        tools:context=".activities.soccer.SoccerActivity">
 
-        <EditText
-            android:id="@+id/content"
+        <com.example.customviewstuff.customs.soccerGame.SoccerView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="match_parent" />
 
-        <Button
-            android:id="@+id/send"
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/main_panel"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="发送"
-            app:layout_constraintTop_toBottomOf="@id/content" />
+            android:layout_height="match_parent"
+            android:background="@color/alpha_gray"
+            android:clickable="true"
+            app:viewVisible="@{command.showMainPanel}">
 
-        <TextView
-            android:id="@+id/text"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/send" />
-        <!--<com.example.customviewstuff.customs.soccerGame.SoccerView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent" />-->
+            <com.example.customviewstuff.customs.DnmButton
+                android:id="@+id/host"
+                android:layout_width="300dp"
+                android:layout_height="100dp"
+                android:text="我是主机"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.3"
+                app:viewVisible="@{command.showButtons}" />
+
+            <TextView
+                android:id="@+id/help_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{command.helpText}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.example.customviewstuff.customs.DnmButton
+                android:id="@+id/client"
+                android:layout_width="300dp"
+                android:layout_height="100dp"
+                android:text="我是副机"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.7"
+                app:viewVisible="@{command.showButtons}" />
+        </android.support.constraint.ConstraintLayout>
     </android.support.constraint.ConstraintLayout>
 </layout>

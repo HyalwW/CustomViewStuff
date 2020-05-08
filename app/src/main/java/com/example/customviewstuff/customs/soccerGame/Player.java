@@ -11,23 +11,7 @@ public class Player {
     public int score, color, angle;
     public boolean isLeasure, holdBall;
     public double direction;
-    private Thread runThread = new Thread() {
-        @Override
-        public void run() {
-            super.run();
-            while (!isLeasure) {
-                try {
-                    Thread.sleep(16);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                angle += 5;
-                if (angle >= 360) {
-                    angle = 0;
-                }
-            }
-        }
-    };
+    private Thread runThread;
 
     public Player() {
         color = randomColor();
@@ -44,6 +28,23 @@ public class Player {
 
     public void running() {
         isLeasure = false;
+        runThread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                while (!isLeasure) {
+                    try {
+                        Thread.sleep(16);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    angle += 5;
+                    if (angle >= 360) {
+                        angle = 0;
+                    }
+                }
+            }
+        };
         runThread.start();
     }
 

@@ -1,16 +1,15 @@
-package com.example.customviewstuff.activities;
+package com.example.customviewstuff.activities.soccer;
 
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
 import com.example.customviewstuff.BaseActivity;
 import com.example.customviewstuff.R;
-import com.example.customviewstuff.activities.soccer.SocketListener;
-import com.example.customviewstuff.activities.soccer.SocketThread;
 import com.example.customviewstuff.databinding.ActivitySoccerBinding;
+import com.example.customviewstuff.helpers.NetworkUtil;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -18,14 +17,17 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implements SocketListener, Handler.Callback {
+public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implements SocketListener, Handler.Callback, View.OnClickListener {
     private boolean isHost, isConnected;
     private ServerSocket serverSocket;
     private Socket socket;
     private SocketThread socketThread;
-    private static final String hostName = "192.168.43.1";
+    private String hostName;
     private HandlerThread searchThread;
     private Handler searchHandler;
+    private BindingCommand command;
+    private IpDialog dialog;
+    private static final int SEARCH_CLIENT = 207, COMNNECT_SERVE = 208;
 
     @Override
     protected int layoutId() {
@@ -34,37 +36,29 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
 
     @Override
     protected void onInit() {
-        isHost = false;
+        command = new BindingCommand();
+        dataBinding.setCommand(command);
+        dataBinding.host.setOnClickListener(this);
+        dataBinding.client.setOnClickListener(this);
         searchThread = new HandlerThread("searchThread");
         searchThread.start();
         searchHandler = new Handler(searchThread.getLooper(), this);
-        if (isHost) {
-            try {
-                serverSocket = new ServerSocket(1250, 50, Inet4Address.getByName(hostName));
-            } catch (IOException e) {
-                e.printStackTrace();
-                finish();
-                Log.e("wwh", "SoccerActivity --> onInit: error" + e);
-            }
-            if (serverSocket != null) {
-                callSearchClient();
-            }
-        } else {
+        dialog = new IpDialog(this);
+        dialog.setListener(ip -> {
+            command.showButtons(false);
+            hostName = ip;
             callConnectHost();
-        }
-        dataBinding.send.setOnClickListener(v -> {
-            if (!TextUtils.isEmpty(dataBinding.content.getText()) && isConnected) {
-                socketThread.send(dataBinding.content.getText().toString());
-            }
         });
     }
 
     private void callSearchClient() {
-        send(207);
+        command.setHelpText("等待副机连接。。。(主机IP：" + hostName + ")");
+        send(SEARCH_CLIENT);
     }
 
     private void callConnectHost() {
-        send(208);
+        command.setHelpText("寻找主机并连接。。。");
+        send(COMNNECT_SERVE);
     }
 
     private void send(int what) {
@@ -88,23 +82,22 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
         } catch (Exception e) {
             e.printStackTrace();
         }
-        searchHandler.removeMessages(207);
-        searchHandler.removeMessages(208);
+        searchHandler.removeMessages(SEARCH_CLIENT);
+        searchHandler.removeMessages(COMNNECT_SERVE);
         searchThread.quit();
     }
 
     @Override
     public void onReceiveMsg(String msg) {
         if (isHost) {
-            dataBinding.text.post(() -> dataBinding.text.setText(dataBinding.text.getText() + "\nclient:" + msg));
         } else {
-            dataBinding.text.post(() -> dataBinding.text.setText(dataBinding.text.getText() + "\nserve:" + msg));
         }
     }
 
     @Override
     public void onClose() {
         isConnected = false;
+        command.showMainPanel(true);
         socketThread = null;
         if (isHost) {
             if (socket != null) {
@@ -114,38 +107,36 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
         } else {
             callConnectHost();
         }
-        dataBinding.text.post(() -> dataBinding.text.setText("断开连接"));
+        Log.e("wwh", "SoccerActivity-->onClose(): 断开连接");
     }
 
     @Override
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
-            case 207:
+            case SEARCH_CLIENT:
                 try {
-                    dataBinding.text.post(() -> dataBinding.text.setText("等待设备。。。"));
                     socket = serverSocket.accept();
-                    dataBinding.text.post(() -> dataBinding.text.setText("连接成功"));
                     socketThread = new SocketThread(socket, this);
                     socketThread.start();
+                    command.showMainPanel(false);
                     isConnected = true;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
-            case 208:
+            case COMNNECT_SERVE:
                 if (socket == null) {
                     socket = new Socket();
                 }
                 try {
                     socket.connect(new InetSocketAddress(hostName, 1250), 10000);
-                    dataBinding.text.post(() -> dataBinding.text.setText("连接成功"));
                     socketThread = new SocketThread(socket, this);
                     socketThread.start();
+                    command.showMainPanel(false);
                     isConnected = true;
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.e("wwh", "SoccerActivity --> onInit: " + e.getMessage());
-                    dataBinding.text.post(() -> dataBinding.text.setText("等待主机。。。"));
                     socket = null;
                     try {
                         Thread.sleep(2000);
@@ -157,5 +148,26 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void onClick(View v) {
+        isHost = v.getId() == R.id.host;
+        if (isHost) {
+            command.showButtons(false);
+            hostName = NetworkUtil.getIpAddr(this);
+            try {
+                serverSocket = new ServerSocket(1250, 50, Inet4Address.getByName(hostName));
+            } catch (IOException e) {
+                e.printStackTrace();
+                finish();
+                Log.e("wwh", "SoccerActivity --> onInit: error" + e);
+            }
+            if (serverSocket != null) {
+                callSearchClient();
+            }
+        } else {
+            dialog.show();
+        }
     }
 }

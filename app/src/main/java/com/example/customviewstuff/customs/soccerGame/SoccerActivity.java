@@ -1,8 +1,9 @@
-package com.example.customviewstuff.activities.soccer;
+package com.example.customviewstuff.customs.soccerGame;
 
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 
@@ -28,6 +29,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
     private BindingCommand command;
     private IpDialog dialog;
     private static final int SEARCH_CLIENT = 207, CONNECT_SERVE = 208;
+    private Vibrator vibrator;
 
     @Override
     protected int layoutId() {
@@ -40,9 +42,18 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
         dataBinding.setCommand(command);
         dataBinding.host.setOnClickListener(this);
         dataBinding.client.setOnClickListener(this);
-        dataBinding.gameView.setListener(msg -> {
-            if (socketThread != null) {
-                socketThread.send(msg);
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        dataBinding.gameView.setListener(new SoccerView.OnMsgSendListener() {
+            @Override
+            public void onSend(String msg) {
+                if (socketThread != null) {
+                    socketThread.send(msg);
+                }
+            }
+
+            @Override
+            public void onGoal() {
+                vibrator.vibrate(500);
             }
         });
 
@@ -59,7 +70,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
     }
 
     private void callSearchClient() {
-        command.setHelpText("等待副机连接。。。(主机IP：" + hostName + ")");
+        command.setHelpText("等待陪玩连接。。。(主机IP：" + hostName + ")");
         send(SEARCH_CLIENT);
     }
 

@@ -4,7 +4,7 @@ package com.example.customviewstuff.customs.soccerGame;
  * Created by Wang.Wenhui
  * Date: 2020/5/9
  */
-public class SocketHostBean extends SocketBean {
+public class SocketHostBean {
     private Player rival;
     private Ball ball;
     //0 自由 1 主机 2 陪玩

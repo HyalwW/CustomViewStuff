@@ -13,7 +13,7 @@ import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.SnakeActivity;
-import com.example.customviewstuff.activities.soccer.SoccerActivity;
+import com.example.customviewstuff.customs.soccerGame.SoccerActivity;
 import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.StayAwayActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;

@@ -1,4 +1,4 @@
-package com.example.customviewstuff.activities.soccer;
+package com.example.customviewstuff.customs.soccerGame;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -12,7 +12,6 @@ import com.example.customviewstuff.customs.DnmButton;
 
 public class IpDialog extends AlertDialog {
     private EditText edit;
-    private DnmButton ok;
     private OnIpAddrCheckListener listener;
 
     protected IpDialog(Context context) {
@@ -24,7 +23,7 @@ public class IpDialog extends AlertDialog {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_ip_input);
         edit = findViewById(R.id.edit);
-        ok = findViewById(R.id.ok);
+        DnmButton ok = findViewById(R.id.ok);
         ok.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(edit.getText())) {
                 if (listener != null) {
@@ -33,7 +32,6 @@ public class IpDialog extends AlertDialog {
                 dismiss();
             }
         });
-        setCanceledOnTouchOutside(false);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     }
 

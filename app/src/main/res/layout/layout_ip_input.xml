@@ -14,7 +14,7 @@
         android:id="@+id/edit"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:digits="123456789."
+        android:digits="0123456789."
         android:inputType="number"
         android:layout_marginTop="20dp"
         android:gravity="center_vertical"

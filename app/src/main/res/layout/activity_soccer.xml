@@ -7,13 +7,13 @@
 
         <variable
             name="command"
-            type="com.example.customviewstuff.activities.soccer.BindingCommand" />
+            type="com.example.customviewstuff.customs.soccerGame.BindingCommand" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activities.soccer.SoccerActivity">
+        tools:context=".customs.soccerGame.SoccerActivity">
 
         <com.example.customviewstuff.customs.soccerGame.SoccerView
             android:id="@+id/game_view"

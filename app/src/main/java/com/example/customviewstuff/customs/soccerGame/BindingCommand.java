@@ -1,4 +1,4 @@
-package com.example.customviewstuff.activities.soccer;
+package com.example.customviewstuff.customs.soccerGame;
 
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;

@@ -22,7 +22,7 @@ import com.google.gson.reflect.TypeToken;
  */
 public class SoccerView extends BaseSurfaceView {
     private Player player1, player2;
-    private boolean isHost, isConnect;
+    private boolean isHost, isConnect, isGoal;
     private Ball soccer;
     private float ballRadius, playerRadius, goalWidth;
     private Path triPath;
@@ -30,9 +30,12 @@ public class SoccerView extends BaseSurfaceView {
     private Gson mGson;
     private int soccerOwner;
     private long coolDown;
-    private boolean isGoal;
     private int countDownTime;
     private RectF bgRect;
+
+    //单人模式
+    private boolean isPractice, goRight;
+    private float xIncrement;
 
     private float speed, maxSpeed, controlRadius;
     private double moveDirection;
@@ -77,6 +80,9 @@ public class SoccerView extends BaseSurfaceView {
             soccer.setPos(getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
         }
         player1.running();
+        if (isPractice) {
+            player2.running();
+        }
         startAnim();
     }
 
@@ -131,22 +137,34 @@ public class SoccerView extends BaseSurfaceView {
                 if (dis2Player1(soccer.x, soccer.y) <= ballRadius + playerRadius) {
                     changeSoccerOwner(1);
                 } else if (dis2Player2(soccer.x, soccer.y) <= ballRadius + playerRadius) {
-                    changeSoccerOwner(2);
+                    if (isPractice) {
+                        soccer.hit(getMeasuredWidth() * 0.04f, getMeasuredWidth() * 0.0001f, randomDirection());
+                        changeSoccerOwner(0);
+                    } else {
+                        changeSoccerOwner(2);
+                    }
                 }
             }
             if (!isGoal) {
                 if (soccerOwner != 2 && dis2Ball(player2.x, player2.y) <= ballRadius + playerRadius) {
-                    changeSoccerOwner(2);
+                    if (isPractice) {
+                        soccer.hit(getMeasuredWidth() * 0.04f, getMeasuredWidth() * 0.0001f, randomDirection());
+                        changeSoccerOwner(0);
+                    } else {
+                        changeSoccerOwner(2);
+                    }
                 }
 
                 if (soccer.y <= ballRadius) {
                     if (soccer.x > (getMeasuredWidth() >> 1) - (goalWidth / 2) && soccer.x < (getMeasuredWidth() >> 1) + (goalWidth / 2)) {
                         goal();
                         player1.goal();
+                        player2.stopRun();
                     }
                 } else if (soccer.y >= getMeasuredHeight() - ballRadius) {
                     if (soccer.x > (getMeasuredWidth() >> 1) - (goalWidth / 2) && soccer.x < (getMeasuredWidth() >> 1) + (goalWidth / 2)) {
                         goal();
+                        player2.goal();
                         player1.stopRun();
                     }
                 }
@@ -159,13 +177,35 @@ public class SoccerView extends BaseSurfaceView {
                     soccer.reset(getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
                     player1.reset(getMeasuredWidth() >> 1, getMeasuredHeight() * 0.7f);
                     player1.running();
+                    if (isPractice) {
+                        player2.running();
+                    }
                 }
             }
         }
         handleMove();
+        if (isPractice && !isGoal) {
+            if (goRight) {
+                if (player2.x < getMeasuredWidth() / 2f + goalWidth / 2) {
+                    player2.x += xIncrement;
+                } else {
+                    goRight = false;
+                }
+            } else {
+                if (player2.x > getMeasuredWidth() / 2f - goalWidth / 2) {
+                    player2.x -= xIncrement;
+                } else {
+                    goRight = true;
+                }
+            }
+        }
         if (isConnect) {
             handleAndSendMsg();
         }
+    }
+
+    private double randomDirection() {
+        return Math.PI / 4 - Math.random() * Math.PI / 2;
     }
 
     private void handleMove() {
@@ -473,6 +513,13 @@ public class SoccerView extends BaseSurfaceView {
 
     public void setListener(OnMsgSendListener listener) {
         this.listener = listener;
+    }
+
+    public void practice() {
+        isPractice = true;
+        player2.setPos(getMeasuredWidth() / 2f - goalWidth / 2, playerRadius * 3);
+        player2.running();
+        xIncrement = goalWidth * 0.03f;
     }
 
     public interface OnMsgSendListener {

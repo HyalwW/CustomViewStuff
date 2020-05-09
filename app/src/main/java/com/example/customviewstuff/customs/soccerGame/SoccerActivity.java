@@ -1,5 +1,6 @@
 package com.example.customviewstuff.customs.soccerGame;
 
+import android.graphics.Paint;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -42,6 +43,12 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
         dataBinding.setCommand(command);
         dataBinding.host.setOnClickListener(this);
         dataBinding.client.setOnClickListener(this);
+        dataBinding.practice.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
+        dataBinding.practice.setOnClickListener(v -> {
+            dataBinding.gameView.setHost(true);
+            dataBinding.gameView.practice();
+            command.showMainPanel(false);
+        });
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         dataBinding.gameView.setListener(new SoccerView.OnMsgSendListener() {
             @Override

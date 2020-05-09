@@ -16,6 +16,7 @@
         tools:context=".activities.soccer.SoccerActivity">
 
         <com.example.customviewstuff.customs.soccerGame.SoccerView
+            android:id="@+id/game_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
@@ -54,7 +55,7 @@
                 android:id="@+id/client"
                 android:layout_width="300dp"
                 android:layout_height="100dp"
-                android:text="我是副机"
+                android:text="我是陪玩"
                 android:textSize="24sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

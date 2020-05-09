@@ -8,7 +8,7 @@ public class BindingCommand {
     public ObservableBoolean showMainPanel, showButtons;
 
     public BindingCommand() {
-        helpText = new ObservableField<>("确保联机设备在同一网络下，开热点设备作为主机");
+        helpText = new ObservableField<>("确保联机设备在同一网络下（wifi/热点）");
         showMainPanel = new ObservableBoolean(true);
         showButtons = new ObservableBoolean(true);
     }

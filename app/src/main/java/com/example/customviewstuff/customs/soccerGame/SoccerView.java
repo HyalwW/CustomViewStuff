@@ -6,11 +6,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 import com.example.customviewstuff.customs.BaseSurfaceView;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Created by Wang.Wenhui
@@ -18,12 +22,18 @@ import com.example.customviewstuff.customs.BaseSurfaceView;
  */
 public class SoccerView extends BaseSurfaceView {
     private Player player1, player2;
-    private boolean isHost;
+    private boolean isHost, isConnect;
     private Ball soccer;
-    private float ballRadius;
-    private float playerRadius;
+    private float ballRadius, playerRadius, goalWidth;
     private Path triPath;
-    private boolean shooting;
+    private OnMsgSendListener listener;
+    private SocketBean socketBean;
+    private Gson mGson;
+    private int soccerOwner;
+    private long coolDown;
+    private boolean isGoal;
+    private int countDownTime;
+    private RectF bgRect;
 
     public SoccerView(Context context) {
         super(context);
@@ -43,73 +53,117 @@ public class SoccerView extends BaseSurfaceView {
         player2 = new Player();
         soccer = new Ball();
         triPath = new Path();
+        mGson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+        soccerOwner = 0;
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        bgRect = new RectF();
     }
 
     @Override
     protected void onReady() {
         ballRadius = getMeasuredWidth() * 0.02f;
         playerRadius = getMeasuredWidth() * 0.04f;
-        player1.setPos(getMeasuredWidth() >> 1, getMeasuredHeight() * 0.8f);
-        player1.running();
+        goalWidth = getMeasuredWidth() >> 1;
+        bgRect.set(0, playerRadius * 2, getMeasuredWidth(), getMeasuredHeight() - playerRadius * 2);
+        player1.setPos(getMeasuredWidth() >> 1, getMeasuredHeight() * 0.7f);
         player2.setPos(getMeasuredWidth() >> 1, getMeasuredHeight() * 0.2f);
-        player2.running();
         soccer.setPos(getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
+        player1.running();
         startAnim();
     }
 
     @Override
     protected void onDataUpdate() {
-        if ((soccer.icmX != 0 || soccer.icmY != 0) && !player1.holdBall && !player2.holdBall) {
-            if (soccer.icmX != 0) {
-                soccer.x += soccer.icmX;
-                if (soccer.x - ballRadius < 0 || soccer.x + ballRadius > getMeasuredWidth()) {
-                    if (soccer.x - ballRadius < 0) {
-                        soccer.x = ballRadius;
-                    } else {
-                        soccer.x = getMeasuredWidth() - ballRadius;
+        if (isHost) {
+            if ((soccer.icmX != 0 || soccer.icmY != 0) && soccerOwner == 0 && !isGoal) {
+                if (soccer.icmX != 0) {
+                    soccer.x += soccer.icmX;
+                    if (soccer.x - ballRadius < 0 || soccer.x + ballRadius > getMeasuredWidth()) {
+                        if (soccer.x - ballRadius < 0) {
+                            soccer.x = ballRadius;
+                        } else {
+                            soccer.x = getMeasuredWidth() - ballRadius;
+                        }
+                        soccer.icmX = -soccer.icmX;
                     }
-                    soccer.icmX = -soccer.icmX;
-                }
-                if (soccer.icmX < 0) {
-                    soccer.icmX += soccer.subX;
-                    if (soccer.icmX > 0) {
-                        soccer.icmX = 0;
-                    }
-                } else {
-                    soccer.icmX -= soccer.subX;
                     if (soccer.icmX < 0) {
-                        soccer.icmX = 0;
-                    }
-                }
-            }
-            if (soccer.icmY != 0) {
-                soccer.y += soccer.icmY;
-                if (soccer.y - ballRadius < 0 || soccer.y + ballRadius > getMeasuredHeight()) {
-                    if (soccer.y - ballRadius < 0) {
-                        soccer.y = ballRadius;
+                        soccer.icmX += soccer.subX;
+                        if (soccer.icmX > 0) {
+                            soccer.icmX = 0;
+                        }
                     } else {
-                        soccer.y = getMeasuredHeight() - ballRadius;
+                        soccer.icmX -= soccer.subX;
+                        if (soccer.icmX < 0) {
+                            soccer.icmX = 0;
+                        }
                     }
-                    soccer.icmY = -soccer.icmY;
                 }
-                if (soccer.icmY < 0) {
-                    soccer.icmY += soccer.subY;
-                    if (soccer.icmY > 0) {
-                        soccer.icmY = 0;
+                if (soccer.icmY != 0) {
+                    soccer.y += soccer.icmY;
+                    if (soccer.y - ballRadius < 0 || soccer.y + ballRadius > getMeasuredHeight()) {
+                        if (soccer.y - ballRadius < 0) {
+                            soccer.y = ballRadius;
+                        } else {
+                            soccer.y = getMeasuredHeight() - ballRadius;
+                        }
+                        soccer.icmY = -soccer.icmY;
                     }
-                } else {
-                    soccer.icmY -= soccer.subY;
                     if (soccer.icmY < 0) {
-                        soccer.icmY = 0;
+                        soccer.icmY += soccer.subY;
+                        if (soccer.icmY > 0) {
+                            soccer.icmY = 0;
+                        }
+                    } else {
+                        soccer.icmY -= soccer.subY;
+                        if (soccer.icmY < 0) {
+                            soccer.icmY = 0;
+                        }
                     }
+                }
+                if (dis2Player1(soccer.x, soccer.y) <= ballRadius + playerRadius) {
+                    changeSoccerOwner(1);
+                } else if (dis2Player2(soccer.x, soccer.y) <= ballRadius + playerRadius) {
+                    changeSoccerOwner(2);
                 }
             }
-            if (dis2Player1(soccer.x, soccer.y) <= ballRadius + playerRadius) {
-                player1.holdBall(true);
-            } else if (dis2Player2(soccer.x, soccer.y) <= ballRadius + playerRadius) {
-                player2.holdBall(true);
+            if (!isGoal) {
+                if (soccerOwner != 2 && dis2Ball(player2.x, player2.y) <= ballRadius + playerRadius) {
+                    changeSoccerOwner(2);
+                }
+
+                if (soccer.y <= ballRadius) {
+                    if (soccer.x > (getMeasuredWidth() >> 1) - (goalWidth / 2) && soccer.x < (getMeasuredWidth() >> 1) + (goalWidth / 2)) {
+                        goal();
+                        player1.goal();
+                    }
+                } else if (soccer.y >= getMeasuredHeight() - ballRadius) {
+                    if (soccer.x > (getMeasuredWidth() >> 1) - (goalWidth / 2) && soccer.x < (getMeasuredWidth() >> 1) + (goalWidth / 2)) {
+                        goal();
+                        player1.stopRun();
+                    }
+                }
+            } else {
+                if (countDownTime > 0) {
+                    countDownTime -= UPDATE_RATE;
+                } else {
+                    countDownTime = 0;
+                    isGoal = false;
+                    soccer.reset(getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
+                    player1.reset(getMeasuredWidth() >> 1, getMeasuredHeight() * 0.7f);
+                    player1.running();
+                }
             }
         }
+        if (isConnect) {
+            handleAndSendMsg();
+        }
+    }
+
+    private void goal() {
+        isGoal = true;
+        countDownTime = 3000;
     }
 
     @Override
@@ -119,13 +173,41 @@ public class SoccerView extends BaseSurfaceView {
         drawPlayer1(canvas);
         drawPlayer2(canvas);
         drawSoccer(canvas);
+        drawCountDownIfNeed(canvas);
+    }
+
+    private void drawCountDownIfNeed(Canvas canvas) {
+        if (countDownTime == 0) return;
+        canvas.drawColor(Color.parseColor("#DD555555"));
+        String text = "1";
+        if (countDownTime > 2000) {
+            text = "3";
+        } else if (countDownTime > 1000) {
+            text = "2";
+        }
+        mPaint.setTextSize(getMeasuredWidth() >> 2);
+        mPaint.setColor(Color.RED);
+        canvas.drawText(text, getMeasuredWidth() >> 1, getMeasuredHeight() >> 1, mPaint);
     }
 
     private void drawPlayGround(Canvas canvas) {
-
+//        mPaint.setStyle(Paint.Style.FILL);
+//        mPaint.setColor(Color.parseColor("#5090EE90"));
+//        canvas.drawRect(bgRect, mPaint);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(getMeasuredHeight() * 0.02f);
+        mPaint.setColor(player1.color);
+        canvas.drawLine((getMeasuredWidth() >> 1) - (goalWidth / 2), getMeasuredHeight(), (getMeasuredWidth() >> 1) + (goalWidth / 2), getMeasuredHeight(), mPaint);
+        mPaint.setColor(player2.color);
+        canvas.drawLine((getMeasuredWidth() >> 1) - (goalWidth / 2), 0, (getMeasuredWidth() >> 1) + (goalWidth / 2), 0, mPaint);
+        mPaint.setStrokeWidth(5f);
     }
 
     private void drawPlayer1(Canvas canvas) {
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setTextSize(getMeasuredWidth() >> 4);
+        mPaint.setColor(Color.BLACK);
+        canvas.drawText(String.valueOf(player1.score), getMeasuredWidth() >> 1, getMeasuredHeight() - playerRadius, mPaint);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(Color.BLUE);
         canvas.drawCircle(player1.x, player1.y, playerRadius, mPaint);
@@ -143,6 +225,10 @@ public class SoccerView extends BaseSurfaceView {
     }
 
     private void drawPlayer2(Canvas canvas) {
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setTextSize(getMeasuredWidth() >> 4);
+        mPaint.setColor(Color.BLACK);
+        canvas.drawText(String.valueOf(player2.score), getMeasuredWidth() >> 1, playerRadius + mPaint.getTextSize(), mPaint);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(Color.BLUE);
         canvas.drawCircle(player2.x, player2.y, playerRadius, mPaint);
@@ -188,9 +274,13 @@ public class SoccerView extends BaseSurfaceView {
     }
 
     private float lastX, lastY;
+    private boolean shoot;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (isGoal) {
+            return true;
+        }
         float eventY = event.getY();
         float eventX = event.getX();
         switch (event.getAction()) {
@@ -201,18 +291,27 @@ public class SoccerView extends BaseSurfaceView {
             case MotionEvent.ACTION_MOVE:
                 if (dis(eventX, eventY, lastX, lastY) >= 5) {
                     if (dis2Player1(eventX, eventY) < playerRadius * 2) {
+                        if (eventY < bgRect.top + playerRadius) {
+                            eventY = bgRect.top + playerRadius;
+                        } else if (eventY > bgRect.bottom - playerRadius) {
+                            eventY = bgRect.bottom - playerRadius;
+                        }
+                        if (eventX < playerRadius) {
+                            eventX = playerRadius;
+                        } else if (eventX > getMeasuredWidth() - playerRadius) {
+                            eventX = getMeasuredWidth() - playerRadius;
+                        }
                         player1.setPos(eventX, eventY);
                     }
-                    if (player1.holdBall) {
-                        float sx = (float) (player1.x + Math.sin(player1.direction) * (ballRadius + playerRadius));
-                        float sy = (float) (player1.y + Math.cos(player1.direction) * (ballRadius + playerRadius));
-                        soccer.setPos(sx, sy);
-                    } else {
-                        if (dis2Ball(player1.x, player1.y) <= ballRadius + playerRadius) {
-                            if (player2.holdBall) {
-                                player2.holdBall(false);
+                    if (isHost) {
+                        if (soccerOwner == 1) {
+                            float sx = (float) (player1.x + Math.sin(player1.direction) * (ballRadius + playerRadius));
+                            float sy = (float) (player1.y + Math.cos(player1.direction) * (ballRadius + playerRadius));
+                            soccer.setPos(sx, sy);
+                        } else {
+                            if (dis2Ball(player1.x, player1.y) <= ballRadius + playerRadius) {
+                                changeSoccerOwner(1);
                             }
-                            player1.holdBall(true);
                         }
                     }
                     lastX = eventX;
@@ -220,9 +319,15 @@ public class SoccerView extends BaseSurfaceView {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (player1.holdBall) {
-                    soccer.hit(getMeasuredWidth() * 0.05f, getMeasuredWidth() * 0.0001f, player1.direction);
-                    player1.holdBall(false);
+                if (isHost) {
+                    if (soccerOwner == 1) {
+                        soccer.hit(getMeasuredWidth() * 0.05f, getMeasuredWidth() * 0.0001f, player1.direction);
+                        soccerOwner = 0;
+                    }
+                } else {
+                    if (soccerOwner == 2) {
+                        shoot = true;
+                    }
                 }
                 break;
         }
@@ -243,5 +348,97 @@ public class SoccerView extends BaseSurfaceView {
 
     private float dis(float sx, float sy, float ex, float ey) {
         return (float) Math.sqrt((sx - ex) * (sx - ex) + (sy - ey) * (sy - ey));
+    }
+
+    private void handleAndSendMsg() {
+        String msg;
+        if (isHost) {
+            Player rival = new Player();
+            rival.copy(player1);
+            rival.transform(getMeasuredWidth(), getMeasuredHeight());
+            Ball ball = new Ball();
+            ball.copy(soccer);
+            ball.transform(getMeasuredWidth(), getMeasuredHeight());
+            SocketHostBean bean = new SocketHostBean(rival, ball, soccerOwner, isGoal, countDownTime);
+            msg = mGson.toJson(bean);
+        } else {
+            boolean isShooting = shoot;
+            shoot = false;
+            Player rival = new Player();
+            rival.copy(player1);
+            rival.transform(getMeasuredWidth(), getMeasuredHeight());
+            SocketClientBean bean = new SocketClientBean(rival, isShooting);
+            msg = mGson.toJson(bean);
+        }
+        if (listener != null) {
+            listener.onSend(msg);
+        }
+    }
+
+    public void receiveMsg(String msg) {
+        if (isHost) {
+            socketBean = mGson.fromJson(msg, new TypeToken<SocketClientBean>() {
+            }.getType());
+            SocketClientBean bean = (SocketClientBean) socketBean;
+            player2.copyResize(bean.getRival(), getMeasuredWidth(), getMeasuredHeight());
+            if (soccerOwner == 2) {
+                float sx = (float) (player2.x + Math.sin(player2.direction) * (ballRadius + playerRadius));
+                float sy = (float) (player2.y + Math.cos(player2.direction) * (ballRadius + playerRadius));
+                soccer.setPos(sx, sy);
+            }
+            if (bean.isShooting()) {
+                soccer.hit(getMeasuredWidth() * 0.05f, getMeasuredWidth() * 0.0001f, player2.direction);
+                soccerOwner = 0;
+            }
+        } else {
+            socketBean = mGson.fromJson(msg, new TypeToken<SocketHostBean>() {
+            }.getType());
+            SocketHostBean bean = (SocketHostBean) socketBean;
+            player2.copyResize(bean.getRival(), getMeasuredWidth(), getMeasuredHeight());
+            soccer.copyResize(bean.getBall(), getMeasuredWidth(), getMeasuredHeight());
+            soccerOwner = bean.getSoccerOwner();
+            if (isGoal) {
+                if (!bean.isGoal()) {
+                    player1.reset(getMeasuredWidth() >> 1, getMeasuredHeight() * 0.7f);
+                    player1.running();
+                }
+            } else {
+                if (bean.isGoal()) {
+                    if (soccer.y < getMeasuredHeight() >> 1) {
+                        player1.goal();
+                    }
+                    player1.stopRun();
+                }
+            }
+            isGoal = bean.isGoal();
+            countDownTime = bean.getCountDownTime();
+        }
+    }
+
+    private void changeSoccerOwner(int owner) {
+        if (canChangeBall()) {
+            soccerOwner = owner;
+            coolDown = System.currentTimeMillis();
+        }
+    }
+
+    private boolean canChangeBall() {
+        return System.currentTimeMillis() - coolDown >= 500;
+    }
+
+    public void setHost(boolean host) {
+        isHost = host;
+    }
+
+    public void setConnect(boolean connect) {
+        isConnect = connect;
+    }
+
+    public void setListener(OnMsgSendListener listener) {
+        this.listener = listener;
+    }
+
+    public interface OnMsgSendListener {
+        void onSend(String msg);
     }
 }

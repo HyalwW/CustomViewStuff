@@ -27,7 +27,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
     private Handler searchHandler;
     private BindingCommand command;
     private IpDialog dialog;
-    private static final int SEARCH_CLIENT = 207, COMNNECT_SERVE = 208;
+    private static final int SEARCH_CLIENT = 207, CONNECT_SERVE = 208;
 
     @Override
     protected int layoutId() {
@@ -40,9 +40,16 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
         dataBinding.setCommand(command);
         dataBinding.host.setOnClickListener(this);
         dataBinding.client.setOnClickListener(this);
+        dataBinding.gameView.setListener(msg -> {
+            if (socketThread != null) {
+                socketThread.send(msg);
+            }
+        });
+
         searchThread = new HandlerThread("searchThread");
         searchThread.start();
         searchHandler = new Handler(searchThread.getLooper(), this);
+
         dialog = new IpDialog(this);
         dialog.setListener(ip -> {
             command.showButtons(false);
@@ -58,7 +65,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
 
     private void callConnectHost() {
         command.setHelpText("寻找主机并连接。。。");
-        send(COMNNECT_SERVE);
+        send(CONNECT_SERVE);
     }
 
     private void send(int what) {
@@ -83,20 +90,19 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
             e.printStackTrace();
         }
         searchHandler.removeMessages(SEARCH_CLIENT);
-        searchHandler.removeMessages(COMNNECT_SERVE);
+        searchHandler.removeMessages(CONNECT_SERVE);
         searchThread.quit();
     }
 
     @Override
     public void onReceiveMsg(String msg) {
-        if (isHost) {
-        } else {
-        }
+        dataBinding.gameView.receiveMsg(msg);
     }
 
     @Override
     public void onClose() {
         isConnected = false;
+        dataBinding.gameView.setConnect(false);
         command.showMainPanel(true);
         socketThread = null;
         if (isHost) {
@@ -120,11 +126,12 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
                     socketThread.start();
                     command.showMainPanel(false);
                     isConnected = true;
+                    dataBinding.gameView.setConnect(true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
-            case COMNNECT_SERVE:
+            case CONNECT_SERVE:
                 if (socket == null) {
                     socket = new Socket();
                 }
@@ -134,6 +141,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
                     socketThread.start();
                     command.showMainPanel(false);
                     isConnected = true;
+                    dataBinding.gameView.setConnect(true);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.e("wwh", "SoccerActivity --> onInit: " + e.getMessage());
@@ -153,6 +161,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
     @Override
     public void onClick(View v) {
         isHost = v.getId() == R.id.host;
+        dataBinding.gameView.setHost(isHost);
         if (isHost) {
             command.showButtons(false);
             hostName = NetworkUtil.getIpAddr(this);

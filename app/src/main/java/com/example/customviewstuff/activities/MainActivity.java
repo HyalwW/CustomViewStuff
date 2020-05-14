@@ -24,13 +24,13 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     @Override
     protected void onInit() {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp2px(80));
+        params.topMargin = 10;
         for (String s : Factory.keys()) {
             DnmButton button = new DnmButton(this);
             button.setText(s);
             button.setTag(s);
             button.setOnClickListener(this);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp2px(80));
-            params.topMargin = 10;
             dataBinding.btnContainer.addView(button, params);
         }
         for (String permission : BASIC_PERMISSIONS) {

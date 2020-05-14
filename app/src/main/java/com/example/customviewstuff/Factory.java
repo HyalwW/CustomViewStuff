@@ -3,6 +3,7 @@ package com.example.customviewstuff;
 import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
+import com.example.customviewstuff.activities.FadeAwayActivity;
 import com.example.customviewstuff.activities.FrameActivity;
 import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.HexaActivity;
@@ -13,7 +14,6 @@ import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.SnakeActivity;
-import com.example.customviewstuff.customs.soccerGame.SoccerActivity;
 import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.StayAwayActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;
@@ -25,6 +25,7 @@ import com.example.customviewstuff.activities.VideoActivity;
 import com.example.customviewstuff.activities.WaveActivity;
 import com.example.customviewstuff.activities.WaveTextActivity;
 import com.example.customviewstuff.activities.WebActivity;
+import com.example.customviewstuff.customs.soccerGame.SoccerActivity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class Factory {
     private static final String JUMP_TEXT = "弹起的字";
     private static final String WAVE_WATER = "水波";
     private static final String SOCCER = "足球小子";
+    private static final String FADE_AWAY = "消散的光点";
 
     static {
         caches = new HashMap<>();
@@ -86,6 +88,7 @@ public class Factory {
         caches.put(WAVE_TEXT, WaveTextActivity.class);
         caches.put(WAVE_WATER, WaveActivity.class);
         caches.put(SOCCER, SoccerActivity.class);
+        caches.put(FADE_AWAY, FadeAwayActivity.class);
     }
 
     public static Class create(String s) {

@@ -19,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".activities.FadeAwayActivity" />
         <activity android:name=".customs.soccerGame.SoccerActivity" />
         <activity android:name=".activities.WaveActivity" />
         <activity android:name=".activities.WaveTextActivity" />

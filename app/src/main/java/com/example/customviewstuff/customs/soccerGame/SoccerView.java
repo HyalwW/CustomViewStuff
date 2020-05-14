@@ -509,6 +509,9 @@ public class SoccerView extends BaseSurfaceView {
 
     public void setConnect(boolean connect) {
         isConnect = connect;
+        if (connect) {
+            isPractice = false;
+        }
     }
 
     public void setListener(OnMsgSendListener listener) {

@@ -6,6 +6,7 @@ import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;
 import com.example.customviewstuff.activities.FrameActivity;
 import com.example.customviewstuff.activities.HeartActivity;
+import com.example.customviewstuff.activities.HelixActivity;
 import com.example.customviewstuff.activities.HexaActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
 import com.example.customviewstuff.activities.JumpTextActivity;
@@ -16,6 +17,7 @@ import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.SnakeActivity;
 import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.StayAwayActivity;
+import com.example.customviewstuff.activities.StereoActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;
 import com.example.customviewstuff.activities.TimeActivity;
 import com.example.customviewstuff.activities.TreeActivity;
@@ -60,6 +62,8 @@ public class Factory {
     private static final String WAVE_WATER = "水波";
     private static final String SOCCER = "足球小子";
     private static final String FADE_AWAY = "消散的光点";
+    private static final String D_N_A = "螺旋飞天";
+    private static final String STEREO = "立体";
 
     static {
         caches = new HashMap<>();
@@ -89,6 +93,8 @@ public class Factory {
         caches.put(WAVE_WATER, WaveActivity.class);
         caches.put(SOCCER, SoccerActivity.class);
         caches.put(FADE_AWAY, FadeAwayActivity.class);
+        caches.put(D_N_A, HelixActivity.class);
+        caches.put(STEREO, StereoActivity.class);
     }
 
     public static Class create(String s) {

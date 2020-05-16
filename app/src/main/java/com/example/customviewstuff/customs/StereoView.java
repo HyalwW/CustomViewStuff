@@ -19,14 +19,19 @@ import java.util.Random;
 public class StereoView extends BaseSurfaceView {
     private Random random;
     private float bx, by;
+    //刷新旋转角度
     private double angle;
+    private static final long duration = 5000;
+    //立体最小圆半径
+    private float baseRadius;
+    private List<Circle> circles;
+    //每个小圆半径
+    private float circleRadius;
     private double rotateAngle;
     private float centerOffset;
-    private static final long duration = 5000;
-    private static float baseRadius;
-    private List<Circle> circles;
-    private float circleRadius;
-    private double nowAngle;
+    private float maxCenterOffset;
+
+    private boolean spin, isClick;
 
     public StereoView(Context context) {
         super(context);
@@ -52,27 +57,31 @@ public class StereoView extends BaseSurfaceView {
         bx = getMeasuredWidth() >> 1;
         by = getMeasuredHeight() >> 1;
         circleRadius = getMeasuredWidth() * 0.02f;
-        baseRadius = getMeasuredWidth() * 0.2f;
+        baseRadius = getMeasuredWidth() * 0.16f;
         rotateAngle = 0;
         centerOffset = getMeasuredWidth() * 0.01f;
-        double aa = 0;
-        while (aa < Math.PI * 2) {
-            aa += Math.PI / 12;
-            for (int i = 0; i < 15; i++) {
-                float len = i * centerOffset;
-                double a = rotateAngle - Math.PI;
-                Circle circle = new Circle(((float) (bx + len * Math.sin(a))), ((float) (by + len * Math.cos(a))), baseRadius + len, aa);
-                circles.add(circle);
+        maxCenterOffset = getMeasuredWidth() * 0.012f;
+        if (circles.size() == 0) {
+            double aa = 0;
+            while (aa < Math.PI * 2) {
+                aa += Math.PI / 12;
+                for (int i = 0; i < 15; i++) {
+                    Circle circle = new Circle(i, aa);
+                    circles.add(circle);
+                }
             }
         }
+        spin = true;
         startAnim();
     }
 
     @Override
     protected void onDataUpdate() {
-        angle += Math.PI * 2 * UPDATE_RATE / duration;
-        if (angle % Math.PI * 2 == 0) {
-            angle = 0;
+        if (spin) {
+            angle += Math.PI * 2 * UPDATE_RATE / duration;
+            if (angle % Math.PI * 2 == 0) {
+                angle = 0;
+            }
         }
     }
 
@@ -81,8 +90,8 @@ public class StereoView extends BaseSurfaceView {
         canvas.drawColor(Color.WHITE);
         for (Circle circle : circles) {
             mPaint.setColor(circle.color);
-            float x = (float) (circle.radius * Math.sin(angle + circle.radiusOffset) + circle.cx);
-            float y = (float) (circle.radius * Math.cos(angle + circle.radiusOffset) + circle.cy);
+            float x = (float) (circle.radius * Math.sin(angle + circle.angleOffset) + circle.cx);
+            float y = (float) (circle.radius * Math.cos(angle + circle.angleOffset) + circle.cy);
             canvas.drawCircle(x, y, circleRadius, mPaint);
         }
     }
@@ -104,19 +113,21 @@ public class StereoView extends BaseSurfaceView {
 
     private class Circle {
         float cx, cy, radius;
-        double radiusOffset;
-        int color;
+        double angleOffset;
+        int index, color;
 
-        Circle(float cx, float cy, float radius, double radiusOffset) {
-            reset(cx, cy, radius, radiusOffset);
+        Circle(int index, double angleOffset) {
+            this.index = index;
+            this.angleOffset = angleOffset;
+            color = randomColor();
+            reset();
         }
 
-        void reset(float cx, float cy, float radius, double radiusOffset) {
-            this.cx = cx;
-            this.cy = cy;
-            this.radius = radius;
-            this.radiusOffset = radiusOffset;
-            color = randomColor();
+        void reset() {
+            float len = index * centerOffset;
+            this.cx = (float) (bx + len * Math.sin(rotateAngle));
+            this.cy = (float) (by + len * Math.cos(rotateAngle));
+            this.radius = baseRadius + len;
         }
     }
 
@@ -128,7 +139,6 @@ public class StereoView extends BaseSurfaceView {
         return random.nextInt(255);
     }
 
-    private float downX, downY;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -136,23 +146,35 @@ public class StereoView extends BaseSurfaceView {
         float eventY = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                downX = eventX;
-                downY = eventY;
+                isClick = true;
                 break;
             case MotionEvent.ACTION_MOVE:
-                nowAngle = Math.PI / 2 - Math.atan2(eventY - downY, eventX - downX);
-                resetAngle(nowAngle);
+                isClick = false;
+                double nowAngle = Math.PI / 2 - Math.atan2(eventY - by, eventX - bx);
+                float dis = dis(eventX, eventY, bx, by);
+                float max = baseRadius * 1.5f;
+                dis = Math.min(dis, max);
+                float offset = maxCenterOffset * (dis / max);
+                reset(nowAngle, offset);
+                break;
+            case MotionEvent.ACTION_UP:
+                if (isClick) {
+                    spin = !spin;
+                }
                 break;
         }
         return true;
     }
 
-    private void resetAngle(double angle) {
-        this.rotateAngle = angle;
+    private float dis(float sx, float sy, float ex, float ey) {
+        return (float) Math.sqrt((ex - sx) * (ex - sx) + (ey - sy) * (ey - sy));
+    }
+
+    private void reset(double angle, float offset) {
+        rotateAngle = angle + Math.PI;
+        centerOffset = offset;
         for (Circle circle : circles) {
-            double a = rotateAngle - Math.PI;
-            float len = circle.radius - baseRadius;
-            circle.reset(((float) (bx + len * Math.sin(a))), ((float) (by + len * Math.cos(a))), circle.radius, circle.radiusOffset);
+            circle.reset();
         }
     }
 }

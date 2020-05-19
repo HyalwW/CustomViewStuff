@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activities.MultiTouchActivity">
+
+        <com.example.customviewstuff.customs.MultiTouchView
+            android:id="@+id/multi_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.example.customviewstuff.customs.DnmButton
+            android:id="@+id/start"
+            android:layout_width="match_parent"
+            android:textSize="20sp"
+            android:layout_height="50dp"
+            android:text="开 始 选 人"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+</layout>

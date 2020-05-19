@@ -11,6 +11,7 @@ import com.example.customviewstuff.activities.HexaActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
 import com.example.customviewstuff.activities.JumpTextActivity;
 import com.example.customviewstuff.activities.LightingActivity;
+import com.example.customviewstuff.activities.MultiTouchActivity;
 import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
@@ -64,6 +65,7 @@ public class Factory {
     private static final String FADE_AWAY = "消散的光点";
     private static final String D_N_A = "螺旋飞天";
     private static final String STEREO = "立体";
+    private static final String MULTI_TOUCH = "多点触控";
 
     static {
         caches = new HashMap<>();
@@ -95,6 +97,7 @@ public class Factory {
         caches.put(FADE_AWAY, FadeAwayActivity.class);
         caches.put(D_N_A, HelixActivity.class);
         caches.put(STEREO, StereoActivity.class);
+        caches.put(MULTI_TOUCH, MultiTouchActivity.class);
     }
 
     public static Class create(String s) {

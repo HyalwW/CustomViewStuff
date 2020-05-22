@@ -19,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".activities.FireActivity"></activity>
         <activity android:name=".activities.MultiTouchActivity" />
         <activity android:name=".activities.StereoActivity" />
         <activity android:name=".activities.HelixActivity" />

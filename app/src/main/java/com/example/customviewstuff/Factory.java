@@ -4,6 +4,7 @@ import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;
+import com.example.customviewstuff.activities.FireActivity;
 import com.example.customviewstuff.activities.FrameActivity;
 import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.HelixActivity;
@@ -66,6 +67,7 @@ public class Factory {
     private static final String D_N_A = "螺旋飞天";
     private static final String STEREO = "立体";
     private static final String MULTI_TOUCH = "多点触控";
+    private static final String FIRE = "火焰";
 
     static {
         caches = new HashMap<>();
@@ -98,6 +100,7 @@ public class Factory {
         caches.put(D_N_A, HelixActivity.class);
         caches.put(STEREO, StereoActivity.class);
         caches.put(MULTI_TOUCH, MultiTouchActivity.class);
+        caches.put(FIRE, FireActivity.class);
     }
 
     public static Class create(String s) {

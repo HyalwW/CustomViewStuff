@@ -42,8 +42,6 @@ public class CartAnimView extends BaseSurfaceView {
 
     @Override
     protected void onInit() {
-        setZOrderOnTop(true);
-        getHolder().setFormat(PixelFormat.TRANSLUCENT);
         goods = BitmapFactory.decodeResource(getResources(), R.drawable.goods);
         cart = BitmapFactory.decodeResource(getResources(), R.drawable.cart_flow);
         mPath = new Path();

@@ -20,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MultiTouchView extends BaseSurfaceView {
     private List<Compass> compasses;
     private Random random;
-    private float circleRadius;
+    private float circleRadius, height;
     private float strokeRadius, strokeWidth;
     private DashPathEffect dashPathEffect;
 
@@ -58,9 +58,11 @@ public class MultiTouchView extends BaseSurfaceView {
     @Override
     protected void onReady() {
         circleRadius = getMeasuredWidth() * 0.15f;
+        height = circleRadius * 0.05f;
         strokeRadius = circleRadius + getMeasuredWidth() * 0.03f;
         strokeWidth = getMeasuredWidth() * 0.03f;
-        dashPathEffect = new DashPathEffect(new float[]{2, 10}, 0);
+        float circleLength = (float) (Math.PI * 2 * circleRadius) / 50;
+        dashPathEffect = new DashPathEffect(new float[]{circleLength * 3, circleLength * 2}, 0);
         mPaint.setTextSize(strokeRadius);
         startAnim();
     }
@@ -160,7 +162,7 @@ public class MultiTouchView extends BaseSurfaceView {
             canvas.restore();
             mPaint.setStyle(Paint.Style.FILL);
             mPaint.setPathEffect(null);
-            canvas.drawCircle(compass.x, compass.y, circleRadius, mPaint);
+            canvas.drawCircle(compass.x, compass.y, circleRadius + compass.radius, mPaint);
             mPaint.setColor(Color.WHITE);
             canvas.drawText(String.valueOf(compass.index + 1), compass.x, compass.y + mPaint.getTextSize() / 3, mPaint);
         }
@@ -221,6 +223,8 @@ public class MultiTouchView extends BaseSurfaceView {
 
     public void start() {
         if (!isLooping && compasses.size() > 0) {
+            selectedColor = Color.WHITE;
+            selectedIndex = 0;
             keepTime = randomKeepTime();
             maintainTime = 0;
             loopTime = 0;
@@ -246,7 +250,7 @@ public class MultiTouchView extends BaseSurfaceView {
     }
 
     class Compass {
-        float x, y;
+        float x, y, radius;
         int color, index;
         int angle;
 
@@ -254,6 +258,7 @@ public class MultiTouchView extends BaseSurfaceView {
             this.x = x;
             this.y = y;
             this.index = index;
+            radius = -height;
             color = randomColor();
         }
 
@@ -263,10 +268,11 @@ public class MultiTouchView extends BaseSurfaceView {
         }
 
         void rotate() {
-            angle += 10;
+            angle += 4;
             if (angle == 360) {
                 angle = 0;
             }
+            radius = (float) (Math.sin(angle / 360f * Math.PI * 2) * height - height);
         }
     }
 
@@ -278,7 +284,7 @@ public class MultiTouchView extends BaseSurfaceView {
     }
 
     private boolean checkColor(int color) {
-        if (color == selectedColor || color == Color.RED)
+        if (color == selectedColor || color == Color.RED || color == Color.WHITE)
             return false;
         for (Compass compass : compasses) {
             if (compass.color == color)

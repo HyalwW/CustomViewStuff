@@ -1,0 +1,39 @@
+package com.example.customviewstuff.customs.eyes;
+
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+
+/**
+ * Created by Wang.Wenhui
+ * Date: 2020/5/25
+ * Description: blablabla
+ */
+public class TriEye extends Eye {
+    TriEye(float cx, float cy, float width, float height) {
+        super(cx, cy, width, height);
+    }
+
+    @Override
+    public void draw(Canvas canvas, Paint paint) {
+        drawRedBase(canvas, paint);
+        paint.setColor(Color.BLACK);
+        canvas.drawCircle(cx, cy, ballRadius * 0.18f, paint);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(ballRadius * 0.03f);
+        canvas.drawCircle(cx, cy, ballRadius * 0.7f, paint);
+        paint.setStyle(Paint.Style.FILL);
+        for (int i = 0; i < 3; i++) {
+            canvas.save();
+            int angle = i * 120;
+            canvas.rotate(angle, cx, cy);
+            canvas.drawCircle(cx, cy - ballRadius * 0.7f, ballRadius * 0.15f, paint);
+            drawPath.reset();
+            drawPath.moveTo(cx - ballRadius * 0.15f, cy - ballRadius * 0.7f);
+            drawPath.quadTo(cx - ballRadius * 0.15f, cy - ballRadius * 0.9f, cx + ballRadius * 0.12f, cy - ballRadius * 0.92f);
+            drawPath.close();
+            canvas.drawPath(drawPath, paint);
+            canvas.restore();
+        }
+    }
+}

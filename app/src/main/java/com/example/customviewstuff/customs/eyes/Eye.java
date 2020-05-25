@@ -32,10 +32,18 @@ public abstract class Eye {
             gradient = new RadialGradient(cx, cy, ballRadius, new int[]{Color.RED, 0xFF8B0000}, null, Shader.TileMode.CLAMP);
         }
         paint.setShader(gradient);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setStrokeWidth(5f);
         canvas.drawCircle(cx, cy, ballRadius, paint);
         paint.setShader(null);
     }
 
+    void blackDot(Canvas canvas, Paint paint) {
+        paint.setColor(Color.BLACK);
+        canvas.drawCircle(cx, cy, ballRadius * 0.18f, paint);
+    }
+
     public abstract void draw(Canvas canvas, Paint paint);
 
+    public abstract Eye next();
 }

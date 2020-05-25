@@ -13,7 +13,6 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -34,7 +33,7 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
     protected SurfaceHolder holder;
     protected long UPDATE_RATE = 16;
     protected Paint mPaint;
-    protected boolean running = true, isDrawing = false;
+    protected boolean running = true, isDrawing = false, isAlive;
     private List<Runnable> queue;
     private LifecycleListener listener;
     private ExecutorService threadPool;
@@ -94,6 +93,7 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
     }
 
     private synchronized void drawEverything(Object data, Rect dirty) {
+        if (!isAlive) return;
         dispatchSafeModifyData();
         isDrawing = true;
         onDataUpdate();
@@ -147,6 +147,7 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
         mHandlerThread = new HandlerThread("drawThread");
         mHandlerThread.start();
         drawHandler = new Handler(mHandlerThread.getLooper(), this);
+        isAlive = true;
         //解决第一次使用dirty会被改变的问题
         callDraw("", new Rect());
         onReady();
@@ -167,6 +168,7 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
         if (running) {
             stopAnim();
         }
+        isAlive = false;
         drawHandler.removeCallbacksAndMessages(null);
         if (queue != null && queue.size() > 0) {
             queue.clear();
@@ -270,7 +272,9 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
 
         private void sendDelay(long millis) {
             checkMessageNonNull();
-            drawHandler.sendMessageAtTime(message, millis < 0 ? 10 : SystemClock.uptimeMillis() + millis);
+            if (mHandlerThread.isAlive() && isAlive) {
+                drawHandler.sendMessageAtTime(message, millis < 0 ? 10 : SystemClock.uptimeMillis() + millis);
+            }
         }
 
         private void checkMessageNonNull() {

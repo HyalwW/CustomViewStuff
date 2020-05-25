@@ -3,6 +3,7 @@ package com.example.customviewstuff;
 import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
+import com.example.customviewstuff.activities.EyeActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;
 import com.example.customviewstuff.activities.FireActivity;
 import com.example.customviewstuff.activities.FrameActivity;
@@ -68,6 +69,7 @@ public class Factory {
     private static final String STEREO = "立体";
     private static final String MULTI_TOUCH = "多点触控";
     private static final String FIRE = "火焰";
+    private static final String EYE = "写轮眼";
 
     static {
         caches = new HashMap<>();
@@ -101,6 +103,7 @@ public class Factory {
         caches.put(STEREO, StereoActivity.class);
         caches.put(MULTI_TOUCH, MultiTouchActivity.class);
         caches.put(FIRE, FireActivity.class);
+        caches.put(EYE, EyeActivity.class);
     }
 
     public static Class create(String s) {

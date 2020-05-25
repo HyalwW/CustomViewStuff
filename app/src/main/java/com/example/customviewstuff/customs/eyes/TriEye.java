@@ -10,22 +10,25 @@ import android.graphics.Paint;
  * Description: blablabla
  */
 public class TriEye extends Eye {
+    private int state;
+
     TriEye(float cx, float cy, float width, float height) {
         super(cx, cy, width, height);
+        state = 1;
     }
 
     @Override
     public void draw(Canvas canvas, Paint paint) {
         drawRedBase(canvas, paint);
-        paint.setColor(Color.BLACK);
-        canvas.drawCircle(cx, cy, ballRadius * 0.18f, paint);
+        blackDot(canvas, paint);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(ballRadius * 0.03f);
         canvas.drawCircle(cx, cy, ballRadius * 0.7f, paint);
         paint.setStyle(Paint.Style.FILL);
-        for (int i = 0; i < 3; i++) {
+        int base = 360 / state;
+        for (int i = 0; i < state; i++) {
             canvas.save();
-            int angle = i * 120;
+            int angle = base * i;
             canvas.rotate(angle, cx, cy);
             canvas.drawCircle(cx, cy - ballRadius * 0.7f, ballRadius * 0.15f, paint);
             drawPath.reset();
@@ -35,5 +38,14 @@ public class TriEye extends Eye {
             canvas.drawPath(drawPath, paint);
             canvas.restore();
         }
+    }
+
+    @Override
+    public Eye next() {
+        if (state == 3) {
+            return new SasukeEye(cx, cy, width, height);
+        }
+        state++;
+        return this;
     }
 }

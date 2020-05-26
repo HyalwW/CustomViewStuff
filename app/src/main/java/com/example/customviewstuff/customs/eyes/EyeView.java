@@ -25,7 +25,7 @@ public class EyeView extends BaseSurfaceView {
 
     private boolean blink;
     private long blinkTime, blinkDuration = 960;
-    private long rotateTime = 1600, rotateDuration = 1800;
+    private long rotateTime = 2000, rotateDuration = 1600;
     private float maxHeight, width;
 
     public EyeView(Context context) {

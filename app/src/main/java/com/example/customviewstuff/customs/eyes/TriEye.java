@@ -1,8 +1,9 @@
 package com.example.customviewstuff.customs.eyes;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
+
+import java.util.Random;
 
 /**
  * Created by Wang.Wenhui
@@ -10,11 +11,13 @@ import android.graphics.Paint;
  * Description: blablabla
  */
 public class TriEye extends Eye {
+    private Random random;
     private int state;
 
     TriEye(float cx, float cy, float width, float height) {
         super(cx, cy, width, height);
         state = 1;
+        random = new Random();
     }
 
     @Override
@@ -43,7 +46,14 @@ public class TriEye extends Eye {
     @Override
     public Eye next() {
         if (state == 3) {
-            return new SasukeEye(cx, cy, width, height);
+            int ri = random.nextInt(2);
+            switch (ri) {
+                case 0:
+                    return new SasukeEye(cx, cy, width, height);
+                case 1:
+                default:
+                    return new MultiTriEye(cx, cy, width, height);
+            }
         }
         state++;
         return this;

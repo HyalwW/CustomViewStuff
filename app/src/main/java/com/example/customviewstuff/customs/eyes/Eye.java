@@ -29,7 +29,7 @@ public abstract class Eye {
 
     void drawRedBase(Canvas canvas, Paint paint) {
         if (gradient == null) {
-            gradient = new RadialGradient(cx, cy, ballRadius, new int[]{Color.RED, 0xFF8B0000}, null, Shader.TileMode.CLAMP);
+            gradient = new RadialGradient(cx, cy, ballRadius, new int[]{Color.RED, 0xFF8B0000, Color.TRANSPARENT}, new float[]{0f, 0.95f, 1f}, Shader.TileMode.CLAMP);
         }
         paint.setShader(gradient);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);

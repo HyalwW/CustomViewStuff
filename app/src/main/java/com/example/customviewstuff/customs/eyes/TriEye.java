@@ -52,7 +52,7 @@ public class TriEye extends Eye {
                     return new SasukeEye(cx, cy, width, height);
                 case 1:
                 default:
-                    return new MultiTriEye(cx, cy, width, height);
+                    return new RinneganEye(cx, cy, width, height);
             }
         }
         state++;

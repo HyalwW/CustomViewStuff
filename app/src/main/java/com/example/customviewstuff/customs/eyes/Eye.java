@@ -28,19 +28,28 @@ public abstract class Eye {
     }
 
     void drawRedBase(Canvas canvas, Paint paint) {
+        drawRedBase(canvas, paint, ballRadius);
+    }
+
+    void drawRedBase(Canvas canvas, Paint paint, float radius) {
         if (gradient == null) {
-            gradient = new RadialGradient(cx, cy, ballRadius, new int[]{Color.RED, 0xFF8B0000, Color.TRANSPARENT}, new float[]{0f, 0.95f, 1f}, Shader.TileMode.CLAMP);
+            gradient = new RadialGradient(cx, cy, radius, new int[]{Color.RED, 0xFF8B0000, Color.TRANSPARENT}, new float[]{0f, 0.95f, 1f}, Shader.TileMode.CLAMP);
         }
         paint.setShader(gradient);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeWidth(5f);
-        canvas.drawCircle(cx, cy, ballRadius, paint);
+        canvas.drawCircle(cx, cy, radius, paint);
         paint.setShader(null);
     }
 
     void blackDot(Canvas canvas, Paint paint) {
+        blackDot(canvas, paint, ballRadius * 0.18f);
+    }
+
+    void blackDot(Canvas canvas, Paint paint, float radius) {
         paint.setColor(Color.BLACK);
-        canvas.drawCircle(cx, cy, ballRadius * 0.18f, paint);
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(cx, cy, radius, paint);
     }
 
     public abstract void draw(Canvas canvas, Paint paint);

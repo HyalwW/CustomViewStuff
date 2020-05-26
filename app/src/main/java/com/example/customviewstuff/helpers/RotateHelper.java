@@ -22,12 +22,26 @@ public class RotateHelper {
     private Matrix mMatrix;
     private Camera mCamera;
     private View target;
-    private boolean isClick, isLongClick;
+    private boolean isClick;
     private float downX, downY;
     private ValueAnimator mShakeAnim;
+    private boolean needMove, noReverse;
+    private float maxMove, tx, ty;
 
     public RotateHelper(View target) {
+        this(target, false, 0, false);
+    }
+
+    private Runnable longClick = () -> {
+        isClick = false;
+        target.performLongClick();
+    };
+
+    public RotateHelper(View target, boolean needMove, float maxMove, boolean noReverse) {
         this.target = target;
+        this.needMove = needMove;
+        this.maxMove = maxMove;
+        this.noReverse = noReverse;
         mMatrix = new Matrix();
         mCamera = new Camera();
         target.setOnTouchListener((v, event) -> {
@@ -38,7 +52,6 @@ public class RotateHelper {
                         mShakeAnim.cancel();
                     }
                     isClick = true;
-                    isLongClick = true;
                     target.postDelayed(longClick, 600);
                     downX = event.getX();
                     downY = event.getY();
@@ -46,7 +59,6 @@ public class RotateHelper {
                 case MotionEvent.ACTION_MOVE:
                     if ((Math.abs(event.getX() - downX) > 5 || Math.abs(event.getY() - downY) > 5) && isClick) {
                         isClick = false;
-                        isLongClick = false;
                     }
                     if (!isClick) {
                         target.removeCallbacks(longClick);
@@ -56,12 +68,11 @@ public class RotateHelper {
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    if (!isLongClick) {
-                        if (isClick) {
-                            target.performClick();
-                        } else {
-                            startShakeAnim();
-                        }
+                    if (isClick) {
+                        target.performClick();
+                        target.removeCallbacks(longClick);
+                    } else {
+                        startShakeAnim();
                     }
                     target.getParent().requestDisallowInterceptTouchEvent(false);
                     break;
@@ -70,14 +81,13 @@ public class RotateHelper {
         });
     }
 
-    private Runnable longClick = () -> target.performLongClick();
-
     //在onDraw方法开始位置中插入该方法
     public void cameraRotate(Canvas mCanvas) {
         mMatrix.reset();
         mCamera.save();
         mCamera.rotateX(mCameraRotateX);//绕x轴旋转
         mCamera.rotateY(mCameraRotateY);//绕y轴旋转
+        mCamera.translate(tx, ty, 0);
         mCamera.getMatrix(mMatrix);//计算对于当前变换的矩阵，并将其复制到传入的mMatrix中
         mCamera.restore();
         /*
@@ -133,6 +143,13 @@ public class RotateHelper {
         //将最终的旋转角度控制在一定的范围内，这里mMaxCameraRotate的值为15，效果比较好
         mCameraRotateX = percentX * mMaxCameraRotate;
         mCameraRotateY = percentY * mMaxCameraRotate;
+        if (needMove) {
+            double moveAngle = -Math.atan2(event.getY() - downY, event.getX() - downX);
+            float dis = (float) Math.sqrt((event.getX() - downX) * (event.getX() - downX) + (event.getY() - downY) * (event.getY() - downY));
+            float moveLength = Math.min(dis / 4, maxMove);
+            tx = (float) (moveLength * Math.cos(moveAngle));
+            ty = (float) (moveLength * Math.sin(moveAngle));
+        }
     }
 
     private void startShakeAnim() {
@@ -142,12 +159,20 @@ public class RotateHelper {
                 PropertyValuesHolder.ofFloat(cameraRotateXName, mCameraRotateX, 0);
         PropertyValuesHolder cameraRotateYHolder =
                 PropertyValuesHolder.ofFloat(cameraRotateYName, mCameraRotateY, 0);
-        this.mShakeAnim = ValueAnimator.ofPropertyValuesHolder(cameraRotateXHolder, cameraRotateYHolder);
-        mShakeAnim.setInterpolator(new ReverseInterpolator());
-        mShakeAnim.setDuration(800);
+        PropertyValuesHolder translateX =
+                PropertyValuesHolder.ofFloat("tx", tx, 0);
+        PropertyValuesHolder translateY =
+                PropertyValuesHolder.ofFloat("ty", ty, 0);
+        this.mShakeAnim = ValueAnimator.ofPropertyValuesHolder(cameraRotateXHolder, cameraRotateYHolder, translateX, translateY);
+        mShakeAnim.setInterpolator(noReverse ? new ReverseInterpolator(0.2f, 0.6f, 1) : new ReverseInterpolator());
+        mShakeAnim.setDuration(noReverse ? 400 : 800);
         mShakeAnim.addUpdateListener(animation -> {
             mCameraRotateX = (float) animation.getAnimatedValue(cameraRotateXName);
             mCameraRotateY = (float) animation.getAnimatedValue(cameraRotateYName);
+            if (needMove) {
+                tx = (float) animation.getAnimatedValue("tx");
+                ty = (float) animation.getAnimatedValue("ty");
+            }
             target.invalidate();
         });
         mShakeAnim.start();

@@ -7,16 +7,19 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.example.customviewstuff.customs.BaseSurfaceView;
+import com.example.customviewstuff.helpers.RotateHelper;
 
 /**
  * Created by Wang.Wenhui
  * Date: 2020/5/25
  * Description: blablabla
  */
-public class EyeView extends BaseSurfaceView {
+public class EyeView extends BaseSurfaceView implements View.OnClickListener {
     private float bx, by;
     //0~360
     private int rotateAngle, maxAngleIncrement;
@@ -27,6 +30,7 @@ public class EyeView extends BaseSurfaceView {
     private long blinkTime, blinkDuration = 960;
     private long rotateTime = 2000, rotateDuration = 1600;
     private float maxHeight, width;
+    private RotateHelper helper;
 
     public EyeView(Context context) {
         super(context);
@@ -45,6 +49,7 @@ public class EyeView extends BaseSurfaceView {
         drawPath = new Path();
         eyePath = new Path();
         maxAngleIncrement = 20;
+        setOnClickListener(this);
     }
 
     @Override
@@ -54,6 +59,7 @@ public class EyeView extends BaseSurfaceView {
         width = getMeasuredWidth() * 0.8f;
         maxHeight = width * 0.6f;
         showEye = new NormalEye(bx, by, getMeasuredWidth(), getMeasuredHeight());
+        helper = new RotateHelper(this, true, getMeasuredWidth() * 0.1f, true);
         startAnim();
     }
 
@@ -81,7 +87,10 @@ public class EyeView extends BaseSurfaceView {
     protected void onRefresh(Canvas canvas) {
         mPaint.setXfermode(null);
         canvas.drawColor(Color.WHITE);
+        canvas.save();
+        helper.cameraRotate(canvas);
         drawEye(canvas);
+        canvas.restore();
         drawBorder(canvas);
     }
 
@@ -128,14 +137,6 @@ public class EyeView extends BaseSurfaceView {
         return false;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            blink();
-        }
-        return true;
-    }
-
     void blink() {
         if (!blink) {
             blink = true;
@@ -143,4 +144,9 @@ public class EyeView extends BaseSurfaceView {
         }
     }
 
+    @Override
+    public void onClick(View v) {
+        Log.e("wwh", "EyeView-->onClick(): " );
+        blink();
+    }
 }

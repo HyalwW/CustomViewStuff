@@ -16,10 +16,10 @@ public class MultiTriEye extends Eye {
 
     @Override
     public void draw(Canvas canvas, Paint paint) {
-        drawRedBase(canvas, paint);
+        drawRedBase(canvas, paint, width * 0.5f);
         paint.setColor(Color.BLACK);
         canvas.drawCircle(cx, cy, ballRadius * 0.1f, paint);
-        float radius = 0, br = ballRadius / 4;
+        float radius = 0, br = width * 0.09f;
         int startAngle = 0;
         for (int i = 0; i < 3; i++) {
             radius += br;

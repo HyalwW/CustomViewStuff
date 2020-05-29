@@ -14,7 +14,7 @@ import android.view.View;
  */
 public class RotateHelper {
     /* Camera旋转的最大角度 */
-    private float mMaxCameraRotate = 15;
+    private float mMaxCameraRotate = 18;
     /* Camera绕X轴旋转的角度 */
     private float mCameraRotateX;
     /* Camera绕Y轴旋转的角度 */
@@ -144,11 +144,12 @@ public class RotateHelper {
         mCameraRotateX = percentX * mMaxCameraRotate;
         mCameraRotateY = percentY * mMaxCameraRotate;
         if (needMove) {
-            double moveAngle = -Math.atan2(event.getY() - downY, event.getX() - downX);
-            float dis = (float) Math.sqrt((event.getX() - downX) * (event.getX() - downX) + (event.getY() - downY) * (event.getY() - downY));
-            float moveLength = Math.min(dis / 4, maxMove);
-            tx = (float) (moveLength * Math.cos(moveAngle));
-            ty = (float) (moveLength * Math.sin(moveAngle));
+            float cx = target.getMeasuredWidth() >> 1, cy = target.getMeasuredHeight() >> 1;
+//            double moveAngle = -Math.atan2(event.getY() - downY, event.getX() - downX);
+//            float dis = (float) Math.sqrt((event.getX() - cx) * (event.getX() - cx) + (event.getY() - cy) * (event.getY() - cy));
+//            float moveLength = Math.min(dis / 2, maxMove);
+            tx = maxMove * percentY;
+            ty = maxMove * percentX;
         }
     }
 

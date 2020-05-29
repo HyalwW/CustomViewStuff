@@ -59,7 +59,7 @@ public class EyeView extends BaseSurfaceView implements View.OnClickListener {
         width = getMeasuredWidth() * 0.8f;
         maxHeight = width * 0.6f;
         showEye = new NormalEye(bx, by, getMeasuredWidth(), getMeasuredHeight());
-        helper = new RotateHelper(this, true, getMeasuredWidth() * 0.1f, true);
+        helper = new RotateHelper(this, true, getMeasuredWidth() * 0.12f, true);
         startAnim();
     }
 

@@ -1,10 +1,10 @@
-package com.example.customviewstuff.customs.soccerGame;
+package com.example.customviewstuff.socket;
 
 /**
  * Created by Wang.Wenhui
  * Date: 2020/5/8
  */
-public interface IMessage {
+interface IMessage {
     void send(String msg);
 
     String read();

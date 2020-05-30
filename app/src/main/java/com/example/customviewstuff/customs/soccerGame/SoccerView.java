@@ -378,6 +378,7 @@ public class SoccerView extends BaseSurfaceView {
             case MotionEvent.ACTION_DOWN:
                 controlX = eventX;
                 controlY = eventY;
+                speed = 0;
                 break;
             case MotionEvent.ACTION_MOVE:
                 moveX = event.getX();

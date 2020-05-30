@@ -1,4 +1,4 @@
-package com.example.customviewstuff.helpers;
+package com.example.customviewstuff.socket;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

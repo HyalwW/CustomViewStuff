@@ -1,4 +1,4 @@
-package com.example.customviewstuff.customs.soccerGame;
+package com.example.customviewstuff.socket;
 
 import android.util.Log;
 
@@ -15,14 +15,14 @@ import java.util.concurrent.Executors;
  * Created by Wang.Wenhui
  * Date: 2020/5/8
  */
-public class SocketThread extends Thread implements IMessage {
+class SocketThread extends Thread implements IMessage {
     private Socket socket;
     private BufferedReader br;
     private OutputStream os;
-    private SocketListener listener;
+    private Listener listener;
     private ExecutorService threadPool;
 
-    public SocketThread(Socket socket, SocketListener in) throws IOException {
+    SocketThread(Socket socket, Listener in) throws IOException {
         super("socketThread");
         this.socket = socket;
         this.listener = in;
@@ -38,6 +38,7 @@ public class SocketThread extends Thread implements IMessage {
             listener.onReceiveMsg(read);
         }
         listener.onClose();
+        listener = null;
     }
 
     @Override
@@ -68,5 +69,11 @@ public class SocketThread extends Thread implements IMessage {
             e.printStackTrace();
             Log.e("wwh", "SocketThread --> send: fail" + e);
         }
+    }
+
+    interface Listener {
+        void onReceiveMsg(String msg);
+
+        void onClose();
     }
 }

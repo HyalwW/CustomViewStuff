@@ -1,9 +1,6 @@
 package com.example.customviewstuff.customs.soccerGame;
 
 import android.graphics.Paint;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
@@ -11,26 +8,18 @@ import android.view.View;
 import com.example.customviewstuff.BaseActivity;
 import com.example.customviewstuff.R;
 import com.example.customviewstuff.databinding.ActivitySoccerBinding;
-import com.example.customviewstuff.helpers.NetworkUtil;
+import com.example.customviewstuff.socket.SocketListener;
+import com.example.customviewstuff.socket.SocketManager;
 
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 
-public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implements SocketListener, Handler.Callback, View.OnClickListener {
-    private boolean isHost, isConnected;
-    private ServerSocket serverSocket;
-    private Socket socket;
-    private SocketThread socketThread;
-    private String hostName;
-    private HandlerThread searchThread;
-    private Handler searchHandler;
+public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implements View.OnClickListener, SocketListener {
+    private boolean isHost;
     private BindingCommand command;
     private IpDialog dialog;
-    private static final int SEARCH_CLIENT = 207, CONNECT_SERVE = 208;
     private Vibrator vibrator;
+    private SocketManager manager;
+    private String ip;
 
     @Override
     protected int layoutId() {
@@ -49,13 +38,13 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
             dataBinding.gameView.practice();
             command.showMainPanel(false);
         });
+        manager = new SocketManager();
+        manager.setListener(this);
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         dataBinding.gameView.setListener(new SoccerView.OnMsgSendListener() {
             @Override
             public void onSend(String msg) {
-                if (socketThread != null) {
-                    socketThread.send(msg);
-                }
+                manager.sendMessage(msg);
             }
 
             @Override
@@ -64,116 +53,70 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
             }
         });
 
-        searchThread = new HandlerThread("searchThread");
-        searchThread.start();
-        searchHandler = new Handler(searchThread.getLooper(), this);
-
         dialog = new IpDialog(this);
         dialog.setListener(ip -> {
             command.showButtons(false);
-            hostName = ip;
-            callConnectHost();
+            SoccerActivity.this.ip = ip;
+            callConnectHost(ip);
         });
     }
 
     private void callSearchClient() {
-        command.setHelpText("等待陪玩连接。。。(主机IP：" + hostName + ")");
-        send(SEARCH_CLIENT);
+        manager.searchClient(this);
+        command.setHelpText("等待陪玩连接。。。(主机IP：" + manager.getIpName() + ")");
     }
 
-    private void callConnectHost() {
+    private void callConnectHost(String ip) {
         command.setHelpText("寻找主机并连接。。。");
-        send(CONNECT_SERVE);
-    }
-
-    private void send(int what) {
-        if (!isConnected) {
-            Message message = searchHandler.obtainMessage();
-            message.what = what;
-            message.sendToTarget();
-        }
+        manager.searchService(ip);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        try {
-            if (serverSocket != null) {
-                serverSocket.close();
-            }
-            if (socket != null) {
-                socket.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        manager.destroy();
+    }
+
+    @Override
+    public void onStartConnect() {
+        Log.e("wwh", "SoccerActivity-->onStartConnect(): ");
+    }
+
+    @Override
+    public void onConnectSuccess(boolean isHost, Socket socket) {
+        command.showMainPanel(false);
+        dataBinding.gameView.setConnect(true);
+        Log.e("wwh", "SoccerActivity-->onConnectSuccess(): ");
+    }
+
+    @Override
+    public void onConnectFailed(String reason) {
+        command.showButtons(true);
+        command.showMainPanel(true);
+        Log.e("wwh", "SoccerActivity-->onConnectFailed(): ");
+    }
+
+    @Override
+    public void onDisconnect() {
+        dataBinding.gameView.setConnect(false);
+        command.showMainPanel(true);
+        if (isHost) {
+            callSearchClient();
+        } else {
+            callConnectHost(ip);
         }
-        searchHandler.removeMessages(SEARCH_CLIENT);
-        searchHandler.removeMessages(CONNECT_SERVE);
-        searchThread.quit();
+        Log.e("wwh", "SoccerActivity-->onDisconnect(): 断开连接");
     }
 
     @Override
     public void onReceiveMsg(String msg) {
         dataBinding.gameView.receiveMsg(msg);
+        Log.e("wwh", "SoccerActivity-->onReceiveMsg(): ");
     }
 
     @Override
-    public void onClose() {
-        isConnected = false;
-        dataBinding.gameView.setConnect(false);
-        command.showMainPanel(true);
-        socketThread = null;
-        if (isHost) {
-            if (socket != null) {
-                socket = null;
-            }
-            callSearchClient();
-        } else {
-            callConnectHost();
-        }
-        Log.e("wwh", "SoccerActivity-->onClose(): 断开连接");
-    }
-
-    @Override
-    public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case SEARCH_CLIENT:
-                try {
-                    socket = serverSocket.accept();
-                    socketThread = new SocketThread(socket, this);
-                    socketThread.start();
-                    command.showMainPanel(false);
-                    isConnected = true;
-                    dataBinding.gameView.setConnect(true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case CONNECT_SERVE:
-                if (socket == null) {
-                    socket = new Socket();
-                }
-                try {
-                    socket.connect(new InetSocketAddress(hostName, 1250), 10000);
-                    socketThread = new SocketThread(socket, this);
-                    socketThread.start();
-                    command.showMainPanel(false);
-                    isConnected = true;
-                    dataBinding.gameView.setConnect(true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e("wwh", "SoccerActivity --> onInit: " + e.getMessage());
-                    socket = null;
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                    callConnectHost();
-                }
-                break;
-        }
-        return true;
+    public void onError(Throwable e) {
+        Log.e("wwh", "SoccerActivity-->onError(): ");
     }
 
     @Override
@@ -182,17 +125,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
         dataBinding.gameView.setHost(isHost);
         if (isHost) {
             command.showButtons(false);
-            hostName = NetworkUtil.getIpAddr(this);
-            try {
-                serverSocket = new ServerSocket(1250, 50, Inet4Address.getByName(hostName));
-            } catch (IOException e) {
-                e.printStackTrace();
-                finish();
-                Log.e("wwh", "SoccerActivity --> onInit: error" + e);
-            }
-            if (serverSocket != null) {
-                callSearchClient();
-            }
+            callSearchClient();
         } else {
             dialog.show();
         }

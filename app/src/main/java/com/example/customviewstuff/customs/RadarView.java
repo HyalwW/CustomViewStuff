@@ -14,13 +14,14 @@ import android.view.MotionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Wang.Wenhui
  * Date: 2020/5/29
  * Description: blablabla
  */
-public class ScannerView extends BaseSurfaceView {
+public class RadarView extends BaseSurfaceView {
     private Random random;
     private Path scannerPath, snackPath;
     private List<Spot> spots;
@@ -28,16 +29,17 @@ public class ScannerView extends BaseSurfaceView {
     private RadialGradient gradient;
     private float dx, dy;
     private Matrix matrix;
+    private boolean isScanning;
 
-    public ScannerView(Context context) {
+    public RadarView(Context context) {
         super(context);
     }
 
-    public ScannerView(Context context, AttributeSet attrs) {
+    public RadarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ScannerView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public RadarView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -45,14 +47,16 @@ public class ScannerView extends BaseSurfaceView {
     protected void onInit() {
         scannerPath = new Path();
         snackPath = new Path();
-        spots = new ArrayList<>();
+        spots = new CopyOnWriteArrayList<>();
         random = new Random();
     }
 
     @Override
     protected void onReady() {
-        for (int i = 0; i < 20; i++) {
-            spots.add(new Spot());
+        if (spots.size() == 0) {
+            for (int i = 0; i < 20; i++) {
+                spots.add(new Spot());
+            }
         }
         scannerRadius = getMeasuredWidth() * 0.15f;
         gradient = new RadialGradient(dx, dy, scannerRadius, new int[]{0x339E9E9E, 0x559E9E9E, 0xAA9370DB, 0x00000000}, new float[]{0f, 0.9f, 0.95f, 1f}, Shader.TileMode.CLAMP);
@@ -64,9 +68,13 @@ public class ScannerView extends BaseSurfaceView {
     @Override
     protected void onDataUpdate() {
         snackPath.reset();
+        scannerPath.reset();
         for (Spot spot : spots) {
             spot.move();
             snackPath.addCircle(spot.x, spot.y, spot.radius, Path.Direction.CW);
+        }
+        if (isScanning) {
+            scannerPath.addCircle(dx, dy, scannerRadius, Path.Direction.CW);
         }
         snackPath.op(scannerPath, Path.Op.INTERSECT);
     }
@@ -76,17 +84,20 @@ public class ScannerView extends BaseSurfaceView {
         canvas.drawColor(Color.WHITE);
         mPaint.setColor(Color.BLACK);
         canvas.drawPath(snackPath, mPaint);
-        if (!scannerPath.isEmpty()) {
+        if (isScanning) {
             matrix.setTranslate(dx, dy);
             gradient.setLocalMatrix(matrix);
             mPaint.setShader(gradient);
             canvas.drawPath(scannerPath, mPaint);
             mPaint.setShader(null);
         }
-//        for (Spot spot : spots) {
-//            mPaint.setColor(spot.color);
-//            canvas.drawCircle(spot.x, spot.y, spot.radius, mPaint);
-//        }
+        for (Spot spot : spots) {
+            if (spot.captureTime != 0) {
+                mPaint.setColor(spot.color);
+                mPaint.setAlpha((int) (255 * spot.captureTime / 1500f));
+                canvas.drawCircle(spot.x, spot.y, spot.radius, mPaint);
+            }
+        }
     }
 
     @Override
@@ -106,24 +117,26 @@ public class ScannerView extends BaseSurfaceView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        scannerPath.reset();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                isScanning = true;
             case MotionEvent.ACTION_MOVE:
                 dx = event.getX();
                 dy = event.getY();
-                scannerPath.addCircle(dx, dy, scannerRadius, Path.Direction.CW);
                 break;
             case MotionEvent.ACTION_UP:
+                isScanning = false;
                 break;
         }
         return true;
     }
 
     private class Spot {
+        private final float bs;
         float x, y, radius, speed;
         int color;
         double md;
+        long captureTime;
         boolean isCatch;
 
         Spot() {
@@ -132,18 +145,32 @@ public class ScannerView extends BaseSurfaceView {
             color = randomColor();
             radius = randomRadius();
             md = randomDirection();
-            speed = randomSpeed();
+            speed = bs = randomSpeed();
         }
 
         void move() {
+            if (isCatch) {
+                return;
+            }
             md += randomDI();
+            if (isScanning && dis(this) < scannerRadius) {
+                captureTime += UPDATE_RATE;
+                if (captureTime > 1500) {
+                    isCatch = true;
+                }
+                speed = getMeasuredWidth() * 0.016f;
+                md += randomDI() * 3;
+            } else {
+                captureTime = 0;
+                speed = bs;
+            }
             if (x - radius <= 0 || x + radius >= getMeasuredWidth()) {
                 if (x - radius <= 0) {
                     x = radius;
                 } else {
                     x = getMeasuredWidth() - radius;
                 }
-                md = Math.PI - md;
+                this.md = Math.PI - this.md;
             }
             if (y - radius <= 0 || y + radius >= getMeasuredHeight()) {
                 if (y - radius <= 0) {
@@ -151,10 +178,10 @@ public class ScannerView extends BaseSurfaceView {
                 } else {
                     y = getMeasuredHeight() - radius;
                 }
-                md = -md;
+                this.md = -this.md;
             }
-            x = x + (float) Math.cos(md) * speed;
-            y = y + (float) Math.sin(md) * speed;
+            x = x + (float) Math.cos(this.md) * speed;
+            y = y + (float) Math.sin(this.md) * speed;
         }
     }
 
@@ -164,6 +191,10 @@ public class ScannerView extends BaseSurfaceView {
 
     private double randomDI() {
         return Math.PI / 40 - Math.PI / 20 * random.nextFloat();
+    }
+
+    private float dis(Spot spot) {
+        return (float) Math.sqrt((spot.x - dx) * (spot.x - dx) + (spot.y - dy) * (spot.y - dy));
     }
 
     private float randomSpeed() {

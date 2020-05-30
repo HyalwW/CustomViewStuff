@@ -4,7 +4,7 @@ import com.example.customviewstuff.BaseActivity;
 import com.example.customviewstuff.R;
 import com.example.customviewstuff.databinding.ActivityScannerBinding;
 
-public class ScannerActivity extends BaseActivity<ActivityScannerBinding> {
+public class RadarActivity extends BaseActivity<ActivityScannerBinding> {
 
     @Override
     protected int layoutId() {

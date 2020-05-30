@@ -17,7 +17,7 @@ import com.example.customviewstuff.activities.MultiTouchActivity;
 import com.example.customviewstuff.activities.PTTActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
-import com.example.customviewstuff.activities.ScannerActivity;
+import com.example.customviewstuff.activities.RadarActivity;
 import com.example.customviewstuff.activities.SnakeActivity;
 import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.StayAwayActivity;
@@ -71,7 +71,7 @@ public class Factory {
     private static final String MULTI_TOUCH = "多点触控";
     private static final String FIRE = "火焰";
     private static final String EYE = "写轮眼";
-    private static final String SCANNER = "扫描";
+    private static final String RADAR = "扫描";
 
     static {
         caches = new HashMap<>();
@@ -106,7 +106,7 @@ public class Factory {
         caches.put(MULTI_TOUCH, MultiTouchActivity.class);
         caches.put(FIRE, FireActivity.class);
         caches.put(EYE, EyeActivity.class);
-        caches.put(SCANNER, ScannerActivity.class);
+        caches.put(RADAR, RadarActivity.class);
     }
 
     public static Class create(String s) {

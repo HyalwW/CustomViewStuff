@@ -190,6 +190,7 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
 
     public void stopAnim() {
         running = false;
+        drawHandler.removeMessages(BASE_RUN);
     }
 
     public void callDraw(Object data) {

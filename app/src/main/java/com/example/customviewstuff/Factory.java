@@ -15,15 +15,17 @@ import com.example.customviewstuff.activities.JumpTextActivity;
 import com.example.customviewstuff.activities.LightingActivity;
 import com.example.customviewstuff.activities.MultiTouchActivity;
 import com.example.customviewstuff.activities.PTTActivity;
+import com.example.customviewstuff.activities.RadarActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
-import com.example.customviewstuff.activities.RadarActivity;
 import com.example.customviewstuff.activities.SnakeActivity;
+import com.example.customviewstuff.activities.StackActivity;
 import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.StayAwayActivity;
 import com.example.customviewstuff.activities.StereoActivity;
 import com.example.customviewstuff.activities.TextAnimActivity;
 import com.example.customviewstuff.activities.TimeActivity;
+import com.example.customviewstuff.activities.ToastActivity;
 import com.example.customviewstuff.activities.TreeActivity;
 import com.example.customviewstuff.activities.TreeGrowActivity;
 import com.example.customviewstuff.activities.TriAngleActivity;
@@ -72,6 +74,8 @@ public class Factory {
     private static final String FIRE = "火焰";
     private static final String EYE = "写轮眼";
     private static final String RADAR = "扫描";
+    private static final String TOAST = "toast";
+    private static final String STACK = "堆栈";
 
     static {
         caches = new HashMap<>();
@@ -107,6 +111,8 @@ public class Factory {
         caches.put(FIRE, FireActivity.class);
         caches.put(EYE, EyeActivity.class);
         caches.put(RADAR, RadarActivity.class);
+        caches.put(TOAST, ToastActivity.class);
+        caches.put(STACK, StackActivity.class);
     }
 
     public static Class create(String s) {

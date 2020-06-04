@@ -19,7 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.RadarActivity"></activity>
+        <activity android:name=".activities.StackActivity"></activity>
+        <activity android:name=".activities.ToastActivity" />
+        <activity android:name=".activities.RadarActivity" />
         <activity android:name=".activities.EyeActivity" />
         <activity android:name=".activities.FireActivity" />
         <activity android:name=".activities.MultiTouchActivity" />

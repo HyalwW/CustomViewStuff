@@ -146,14 +146,15 @@ public class StackView extends BaseSurfaceView {
         mPaint.setColor(Color.BLACK);
         canvas.drawLine(rects[1].left, rects[1].bottom, rects[1].left, rects[1].top, mPaint);
         canvas.drawLine(rects[1].right, rects[1].bottom, rects[1].right, rects[1].top, mPaint);
+        int inContainer = this.inContainer;
         if (selected != null && inContainer != -1) {
-            mPaint.setShader(canDrop() ? green : red);
+            mPaint.setShader(canDrop(inContainer) ? green : red);
             canvas.drawRect(rects[inContainer], mPaint);
             mPaint.setShader(null);
         }
     }
 
-    private boolean canDrop() {
+    private boolean canDrop(int inContainer) {
         return stacks[inContainer].size() == 0 || stacks[inContainer].top().length > selected.length;
     }
 
@@ -230,7 +231,7 @@ public class StackView extends BaseSurfaceView {
                 if ((incY > 0 && y > ty) || (incY < 0 && y < ty)) {
                     y = ty;
                 }
-                if (x == tx && y == ty && stacks[2].size() == level) {
+                if (x == tx && y == ty && stacks[2].size() == level && canTouch) {
                     canTouch = false;
                     postDelayed(nextLevel, 500);
                 }

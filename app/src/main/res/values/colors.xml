@@ -6,4 +6,6 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="alpha_gray">#DD888888</color>
+    <color name="alpha_white">#BBFFFFFF</color>
+    <color name="chat_bg_color">#AA1E90FF</color>
 </resources>

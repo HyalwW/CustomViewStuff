@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activities.ChatRoomActivity">
+
+        <com.example.customviewstuff.customs.RippleView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/chat_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/alpha_white"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:background="@color/chat_bg_color">
+
+                <com.example.customviewstuff.customs.DnmButton
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/chat_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="轻聊(*)"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+
+                <com.example.customviewstuff.customs.DnmButton
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/chat_content"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/chat_bg_color">
+
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxHeight="300dp"
+                    android:minHeight="60dp"
+                    android:paddingStart="10dp"
+                    android:textSize="22sp" />
+
+                <com.example.customviewstuff.customs.DnmButton
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:text="发送"
+                    android:textSize="24sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
+</layout>

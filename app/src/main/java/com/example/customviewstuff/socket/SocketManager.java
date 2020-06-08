@@ -125,6 +125,7 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
 
     public void destroy() {
         isConnected = false;
+        searching = false;
         setListener(null);
         try {
             if (serverSocket != null) {
@@ -213,6 +214,7 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
     @Override
     public void onClose(String address, Socket socket) {
         isConnected = false;
+        searching = false;
         IMessage remove = messages.remove(address);
         if (remove != null) {
             remove.close();

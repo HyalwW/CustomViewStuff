@@ -2,6 +2,7 @@ package com.example.customviewstuff;
 
 import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
+import com.example.customviewstuff.activities.ChatRoomActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.EyeActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;
@@ -76,6 +77,7 @@ public class Factory {
     private static final String RADAR = "扫描";
     private static final String TOAST = "toast";
     private static final String STACK = "堆栈";
+    private static final String CHAT = "聊天室";
 
     static {
         caches = new HashMap<>();
@@ -113,6 +115,7 @@ public class Factory {
         caches.put(RADAR, RadarActivity.class);
         caches.put(TOAST, ToastActivity.class);
         caches.put(STACK, StackActivity.class);
+        caches.put(CHAT, ChatRoomActivity.class);
     }
 
     public static Class create(String s) {

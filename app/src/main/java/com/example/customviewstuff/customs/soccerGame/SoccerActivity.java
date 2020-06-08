@@ -11,8 +11,6 @@ import com.example.customviewstuff.databinding.ActivitySoccerBinding;
 import com.example.customviewstuff.socket.SocketListener;
 import com.example.customviewstuff.socket.SocketManager;
 
-import java.net.Socket;
-
 public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implements View.OnClickListener, SocketListener {
     private boolean isHost;
     private BindingCommand command;
@@ -62,7 +60,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
     }
 
     private void callSearchClient() {
-        manager.searchClient(this);
+        manager.searchClient(this, true);
         command.setHelpText("等待陪玩连接。。。(主机IP：" + manager.getIpName() + ")");
     }
 
@@ -83,10 +81,10 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
     }
 
     @Override
-    public void onConnectSuccess(boolean isHost, Socket socket) {
+    public void onConnectSuccess(boolean isHost, String address) {
         command.showMainPanel(false);
         dataBinding.gameView.setConnect(true);
-        Log.e("wwh", "SoccerActivity-->onConnectSuccess(): ");
+        Log.e("wwh", "SoccerActivity-->onConnectSuccess(): " + address);
     }
 
     @Override
@@ -97,7 +95,7 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
     }
 
     @Override
-    public void onDisconnect() {
+    public void onDisconnect(String address) {
         dataBinding.gameView.setConnect(false);
         command.showMainPanel(true);
         if (isHost) {
@@ -105,18 +103,18 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
         } else {
             callConnectHost(ip);
         }
-        Log.e("wwh", "SoccerActivity-->onDisconnect(): 断开连接");
+        Log.e("wwh", "SoccerActivity-->onDisconnect(): 断开连接 " + address);
     }
 
     @Override
-    public void onReceiveMsg(String msg) {
+    public void onReceiveMsg(String address, String msg) {
         dataBinding.gameView.receiveMsg(msg);
-        Log.e("wwh", "SoccerActivity-->onReceiveMsg(): ");
+//        Log.e("wwh", "SoccerActivity-->onReceiveMsg(): ");
     }
 
     @Override
     public void onError(Throwable e) {
-        Log.e("wwh", "SoccerActivity-->onError(): ");
+        Log.e("wwh", "SoccerActivity-->onError(): " + e.getMessage());
     }
 
     @Override

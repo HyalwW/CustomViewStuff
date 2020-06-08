@@ -107,6 +107,7 @@ public class StackView extends BaseSurfaceView {
         for (Stack<Block> stack : stacks) {
             drawStack(canvas, stack);
         }
+        Block selected = this.selected;
         if (selected != null) {
             mPaint.setColor(selected.color);
             float hw = selected.length / 2;

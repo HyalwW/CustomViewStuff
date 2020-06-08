@@ -8,4 +8,6 @@ interface IMessage {
     void send(String msg);
 
     String read();
+
+    void close();
 }

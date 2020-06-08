@@ -9,13 +9,13 @@ import java.net.Socket;
 public interface SocketListener {
     void onStartConnect();
 
-    void onConnectSuccess(boolean isHost, Socket socket);
+    void onConnectSuccess(boolean isHost, String address);
 
     void onConnectFailed(String reason);
 
-    void onDisconnect();
+    void onDisconnect(String address);
 
-    void onReceiveMsg(String msg);
+    void onReceiveMsg(String address, String msg);
 
     void onError(Throwable e);
 }

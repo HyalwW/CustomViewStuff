@@ -34,11 +34,15 @@ class SocketThread extends Thread implements IMessage {
     public void run() {
         super.run();
         String read;
-        while (socket.isConnected() && (read = read()) != null) {
-            listener.onReceiveMsg(read);
+        while (!socket.isClosed() && socket.isConnected() && (read = read()) != null) {
+            if (listener != null) {
+                listener.onReceiveMsg(socket.getInetAddress().getHostName(), read);
+            }
         }
-        listener.onClose();
-        listener = null;
+        if (listener != null) {
+            listener.onClose(socket.getInetAddress().getHostName(), socket);
+            listener = null;
+        }
     }
 
     @Override
@@ -61,9 +65,17 @@ class SocketThread extends Thread implements IMessage {
         return null;
     }
 
+    @Override
+    public void close() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void sendSocketMsg(String msg) {
         try {
-            Log.e("wwh", "SocketThread --> handleMessage: " + msg);
             os.write(msg.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             e.printStackTrace();
@@ -72,8 +84,8 @@ class SocketThread extends Thread implements IMessage {
     }
 
     interface Listener {
-        void onReceiveMsg(String msg);
+        void onReceiveMsg(String address, String msg);
 
-        void onClose();
+        void onClose(String address, Socket socket);
     }
 }

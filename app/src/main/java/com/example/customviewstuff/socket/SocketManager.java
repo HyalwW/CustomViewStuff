@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import java.io.IOException;
@@ -11,16 +12,16 @@ import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 public class SocketManager implements Handler.Callback, SocketThread.Listener {
     private ServerSocket serverSocket;
-    private Socket socket;
-    private IMessage messager;
+    private ArrayMap<String, IMessage> messages;
     private String hostName;
     private HandlerThread searchThread;
     private Handler searchHandler;
     private static final int SEARCH_CLIENT = 207, CONNECT_SERVE = 208;
-    private boolean isConnected;
+    private boolean isConnected, searching, isSingle;
     private SocketListener listener;
     private TYPE type;
 
@@ -28,9 +29,10 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
         searchThread = new HandlerThread("searchThread");
         searchThread.start();
         searchHandler = new Handler(searchThread.getLooper(), this);
+        messages = new ArrayMap<>();
     }
 
-    public void searchClient(Context context) {
+    public void searchClient(Context context, boolean single) {
         if (type == null) {
             type = TYPE.SERVICE;
         } else if (type != TYPE.SERVICE) {
@@ -39,6 +41,9 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
             }
             return;
         }
+        this.isSingle = single;
+        if (searching) return;
+        searching = true;
         hostName = NetworkUtil.getIpAddr(context);
         try {
             serverSocket = new ServerSocket(1250, 50, Inet4Address.getByName(hostName));
@@ -53,6 +58,10 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
         }
     }
 
+    public void stopSearch() {
+        searching = false;
+    }
+
     public void searchService(String ip) {
         if (type == null) {
             type = TYPE.CLIENT;
@@ -63,6 +72,12 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
             return;
         }
         hostName = ip;
+        if (isConnected) {
+            for (Map.Entry<String, IMessage> entry : messages.entrySet()) {
+                entry.getValue().close();
+            }
+            messages.clear();
+        }
         connect(CONNECT_SERVE);
     }
 
@@ -71,8 +86,10 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
     }
 
     public void sendMessage(String msg) {
-        if (isConnected && messager != null) {
-            messager.send(msg);
+        if (isConnected) {
+            for (Map.Entry<String, IMessage> entry : messages.entrySet()) {
+                entry.getValue().send(msg);
+            }
         }
     }
 
@@ -83,42 +100,43 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
                     if (isConnected) {
                         try {
                             serverSocket.close();
-                            socket.close();
+                            for (Map.Entry<String, IMessage> entry : messages.entrySet()) {
+                                entry.getValue().close();
+                            }
+                            messages.clear();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                     serverSocket = null;
-                    socket = null;
                     break;
                 case CLIENT:
                     if (isConnected) {
-                        try {
-                            socket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        for (Map.Entry<String, IMessage> entry : messages.entrySet()) {
+                            entry.getValue().close();
                         }
+                        messages.clear();
                     }
-                    socket = null;
                     break;
             }
-            messager = null;
             type = null;
         }
     }
 
     public void destroy() {
+        isConnected = false;
         setListener(null);
         try {
             if (serverSocket != null) {
                 serverSocket.close();
             }
-            if (socket != null) {
-                socket.close();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        for (Map.Entry<String, IMessage> entry : messages.entrySet()) {
+            entry.getValue().close();
+        }
+        messages.clear();
         searchHandler.removeMessages(SEARCH_CLIENT);
         searchHandler.removeMessages(CONNECT_SERVE);
         searchThread.quit();
@@ -137,17 +155,20 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
 
     @Override
     public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case SEARCH_CLIENT:
+        if (msg.what == SEARCH_CLIENT) {
+            while (searching) {
                 try {
-                    socket = serverSocket.accept();
-                    SocketThread messager = new SocketThread(socket, this);
-                    this.messager = messager;
-                    messager.start();
+                    Socket socket = serverSocket.accept();
+                    SocketThread message = new SocketThread(socket, this);
+                    message.start();
+                    messages.put(socket.getInetAddress().getHostName(), message);
                     if (listener != null) {
-                        listener.onConnectSuccess(true, socket);
+                        listener.onConnectSuccess(true, socket.getInetAddress().getHostName());
                     }
                     isConnected = true;
+                    if (isSingle) {
+                        stopSearch();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     if (listener != null) {
@@ -155,51 +176,49 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
                         listener.onConnectFailed(e.getMessage());
                     }
                 }
-                break;
-            case CONNECT_SERVE:
-                if (socket == null) {
-                    socket = new Socket();
+            }
+        } else if (msg.what == CONNECT_SERVE) {
+            Socket socket;
+            try {
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(hostName, 1250), 10000);
+                SocketThread message = new SocketThread(socket, this);
+                message.start();
+                messages.put(socket.getInetAddress().getHostName(), message);
+                if (listener != null) {
+                    listener.onConnectSuccess(false, socket.getInetAddress().getHostName());
                 }
+                isConnected = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e("wwh", "SoccerActivity --> onInit: " + e.getMessage());
                 try {
-                    socket.connect(new InetSocketAddress(hostName, 1250), 10000);
-                    SocketThread messager = new SocketThread(socket, this);
-                    this.messager = messager;
-                    messager.start();
-                    if (listener != null) {
-                        listener.onConnectSuccess(false, socket);
-                    }
-                    isConnected = true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e("wwh", "SoccerActivity --> onInit: " + e.getMessage());
-                    socket = null;
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                    connect(CONNECT_SERVE);
+                    Thread.sleep(1500);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
                 }
-                break;
+                connect(CONNECT_SERVE);
+            }
         }
         return true;
     }
 
     @Override
-    public void onReceiveMsg(String msg) {
+    public void onReceiveMsg(String address, String msg) {
         if (listener != null) {
-            listener.onReceiveMsg(msg);
+            listener.onReceiveMsg(address, msg);
         }
     }
 
     @Override
-    public void onClose() {
+    public void onClose(String address, Socket socket) {
         isConnected = false;
-        if (socket != null) {
-            socket = null;
+        IMessage remove = messages.remove(address);
+        if (remove != null) {
+            remove.close();
         }
         if (listener != null) {
-            listener.onDisconnect();
+            listener.onDisconnect(address);
         }
     }
 

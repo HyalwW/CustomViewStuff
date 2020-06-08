@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.ChatRoomActivity"></activity>
+        <activity android:name=".avChat.ChatRoomActivity"></activity>
         <activity android:name=".activities.StackActivity" />
         <activity android:name=".activities.ToastActivity" />
         <activity android:name=".activities.RadarActivity" />

@@ -8,4 +8,5 @@
     <color name="alpha_gray">#DD888888</color>
     <color name="alpha_white">#BBFFFFFF</color>
     <color name="chat_bg_color">#AA1E90FF</color>
+    <color name="light_white">#DDDDDD</color>
 </resources>

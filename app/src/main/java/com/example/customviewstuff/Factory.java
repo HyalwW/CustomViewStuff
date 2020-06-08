@@ -2,7 +2,7 @@ package com.example.customviewstuff;
 
 import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.CartActivity;
-import com.example.customviewstuff.activities.ChatRoomActivity;
+import com.example.customviewstuff.avChat.ChatRoomActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.EyeActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;

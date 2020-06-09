@@ -15,6 +15,7 @@
         <TextView
             android:id="@+id/account"
             android:layout_width="wrap_content"
+            android:layout_marginStart="5dp"
             android:layout_height="wrap_content"
             android:text="发送人"
             android:textColor="@color/alpha_gray" />
@@ -24,7 +25,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
+            android:background="@drawable/bg_chat_out"
             android:maxWidth="300dp"
+            android:padding="5dp"
             android:text="消息内容......"
             android:textColor="@color/black"
             android:textSize="18sp" />

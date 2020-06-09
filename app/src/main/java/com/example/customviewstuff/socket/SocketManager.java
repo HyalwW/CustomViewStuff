@@ -164,7 +164,7 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
                     message.start();
                     messages.put(socket.getInetAddress().getHostName(), message);
                     if (listener != null) {
-                        listener.onConnectSuccess(true, socket.getInetAddress().getHostName());
+                        listener.onConnectSuccess(true, socket.getInetAddress().getHostName(), socket.getLocalAddress().getHostName());
                     }
                     isConnected = true;
                     if (isSingle) {
@@ -187,7 +187,7 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
                 message.start();
                 messages.put(socket.getInetAddress().getHostName(), message);
                 if (listener != null) {
-                    listener.onConnectSuccess(false, socket.getInetAddress().getHostName());
+                    listener.onConnectSuccess(false, socket.getInetAddress().getHostName(), socket.getLocalAddress().getHostName());
                 }
                 isConnected = true;
             } catch (IOException e) {
@@ -213,9 +213,12 @@ public class SocketManager implements Handler.Callback, SocketThread.Listener {
 
     @Override
     public void onClose(String address, Socket socket) {
-        isConnected = false;
-        searching = false;
         IMessage remove = messages.remove(address);
+        if (type == TYPE.CLIENT) {
+            isConnected = false;
+        } else if (messages.size() == 0) {
+            isConnected = false;
+        }
         if (remove != null) {
             remove.close();
         }

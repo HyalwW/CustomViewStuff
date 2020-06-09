@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Wang.Wenhui
@@ -42,7 +43,7 @@ public class RippleView extends BaseSurfaceView {
         nextColor = randomRGB();
         colorType = random.nextInt(3);
         pathMeasure = new PathMeasure();
-        ripples = new ArrayList<>();
+        ripples = new CopyOnWriteArrayList<>();
     }
 
     @Override

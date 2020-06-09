@@ -14,6 +14,7 @@ public class TipViewHolder extends BaseViewHolder<ItemChatTipBinding> {
 
     @Override
     public void bind(ChatBean chatBean) {
+        dataBinding.account.setText(chatBean.getAccount());
         dataBinding.tip.setText(chatBean.getTip());
     }
 }

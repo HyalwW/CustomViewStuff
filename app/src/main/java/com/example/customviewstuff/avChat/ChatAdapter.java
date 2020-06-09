@@ -25,10 +25,9 @@ public class ChatAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     @NonNull
     @Override
-    public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int position) {
+    public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int type) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        ChatBean bean = list.get(position);
-        switch (bean.getType()) {
+        switch (type) {
             case ChatBean.CONTENT_IN:
                 return new InViewHolder(inflater.inflate(R.layout.item_chat_in, viewGroup, false));
             case ChatBean.CONTENT_OUT:
@@ -56,6 +55,11 @@ public class ChatAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     public void addBean(ChatBean chatBean) {
         list.add(chatBean);
+        notifyDataSetChanged();
+    }
+
+    public void clear() {
+        list.clear();
         notifyDataSetChanged();
     }
 }

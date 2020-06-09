@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
+        <import type="com.example.customviewstuff.R" />
+
+        <variable
+            name="command"
+            type="com.example.customviewstuff.avChat.ChatCommand" />
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -28,8 +34,8 @@
                 android:layout_gravity="center"
                 android:background="@color/chat_bg_color">
 
-                <com.example.customviewstuff.customs.DnmButton
-                    android:layout_width="60dp"
+                <View
+                    android:layout_width="100dp"
                     android:layout_height="match_parent" />
 
                 <TextView
@@ -38,13 +44,16 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="轻聊(*)"
+                    android:text="@{command.getRoomText(command.roomName, command.userCount)}"
                     android:textSize="26sp"
                     android:textStyle="bold" />
 
                 <com.example.customviewstuff.customs.DnmButton
-                    android:layout_width="60dp"
-                    android:layout_height="match_parent" />
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimaryDark"
+                    android:text="凭证/IP"
+                    app:onClickCommand="@{command.showIpCommand}" />
             </LinearLayout>
 
             <android.support.v7.widget.RecyclerView
@@ -59,20 +68,102 @@
                 android:background="@color/chat_bg_color">
 
                 <EditText
+                    android:id="@+id/send_edit"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:maxHeight="300dp"
-                    android:minHeight="60dp"
+                    android:minHeight="50dp"
                     android:paddingStart="10dp"
+                    android:text="@={command.sendText}"
                     android:textSize="22sp" />
 
                 <com.example.customviewstuff.customs.DnmButton
                     android:layout_width="100dp"
                     android:layout_height="match_parent"
+                    android:background="@color/colorAccent"
                     android:text="发送"
-                    android:textSize="24sp" />
+                    android:textSize="24sp"
+                    app:clickData="@{command.sendText}"
+                    app:onClickCommand="@{command.onSendCommand}" />
             </LinearLayout>
         </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:clickable="true"
+            app:hideAnim="@{R.anim.pop_out}"
+            app:showAnim="@{R.anim.pop_in}"
+            app:viewVisible="@{command.joiningShow}">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="正在加入聊天室。。。"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+        </FrameLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/chat_join_panel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/gray"
+            app:viewVisible="@{command.showJoinPanel}">
+
+            <com.example.customviewstuff.customs.DnmButton
+                android:id="@+id/create_chat_room"
+                android:layout_width="160dp"
+                android:layout_height="60dp"
+                android:text="创建群聊"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.3"
+                app:onClickCommand="@{command.onCreateCommand}" />
+
+            <EditText
+                android:id="@+id/chat_account"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:gravity="center"
+                android:hint="取个名字吧"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/create_chat_room" />
+
+            <EditText
+                android:id="@+id/chat_id"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:digits="0123456789."
+                android:gravity="center"
+                android:hint="输入房间凭证(ip)"
+                android:inputType="number"
+                android:singleLine="true"
+                android:text="@={command.ip}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/chat_account" />
+
+            <com.example.customviewstuff.customs.DnmButton
+                android:id="@+id/join_chat"
+                android:layout_width="200dp"
+                android:layout_height="70dp"
+                android:layout_marginTop="10dp"
+                android:text="加入群聊"
+                android:textSize="20sp"
+                app:clickData="@{command.ip}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/chat_id"
+                app:onClickCommand="@{command.onClickCommand}" />
+        </android.support.constraint.ConstraintLayout>
     </android.support.constraint.ConstraintLayout>
 </layout>

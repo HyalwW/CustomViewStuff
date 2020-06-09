@@ -81,10 +81,10 @@ public class SoccerActivity extends BaseActivity<ActivitySoccerBinding> implemen
     }
 
     @Override
-    public void onConnectSuccess(boolean isHost, String address) {
+    public void onConnectSuccess(boolean isHost, String toAddress, String meAddress) {
         command.showMainPanel(false);
         dataBinding.gameView.setConnect(true);
-        Log.e("wwh", "SoccerActivity-->onConnectSuccess(): " + address);
+        Log.e("wwh", "SoccerActivity-->onConnectSuccess(): " + toAddress + " " + meAddress);
     }
 
     @Override

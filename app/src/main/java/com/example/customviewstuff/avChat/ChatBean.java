@@ -1,11 +1,15 @@
 package com.example.customviewstuff.avChat;
 
+import java.util.Arrays;
+
 public class ChatBean {
     private int type;
     private String roomName;
+    private String address;
     private String account;
     private String content;
     private String tip;
+    private int userCount;
     private byte[] bitmap;
 
     public int getType() {
@@ -40,6 +44,15 @@ public class ChatBean {
         this.roomName = roomName;
     }
 
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getTip() {
         return tip;
     }
@@ -56,6 +69,13 @@ public class ChatBean {
         this.bitmap = bitmap;
     }
 
+    public int getUserCount() {
+        return userCount;
+    }
+
+    public void setUserCount(int userCount) {
+        this.userCount = userCount;
+    }
 
     public static final int CONTENT_IN = 1;
     public static final int CONTENT_OUT = 2;

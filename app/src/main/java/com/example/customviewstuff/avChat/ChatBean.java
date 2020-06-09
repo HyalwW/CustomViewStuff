@@ -1,7 +1,5 @@
 package com.example.customviewstuff.avChat;
 
-import java.util.Arrays;
-
 public class ChatBean {
     private int type;
     private String roomName;
@@ -9,6 +7,7 @@ public class ChatBean {
     private String account;
     private String content;
     private String tip;
+    private long time;
     private int userCount;
     private byte[] bitmap;
 
@@ -77,8 +76,17 @@ public class ChatBean {
         this.userCount = userCount;
     }
 
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
     public static final int CONTENT_IN = 1;
     public static final int CONTENT_OUT = 2;
     public static final int TIP = 3;
     public static final int IMAGE = 4;
+    public static final int TIME = 5;
 }

@@ -108,8 +108,8 @@ public class ChatCommand {
         userCount.set(userCount.get() - 1);
     }
 
-    public void showJoinPanel() {
-        showJoinPanel.set(true);
+    public void showJoinPanel(boolean show) {
+        showJoinPanel.set(show);
     }
 
     public void showJoining(boolean show) {

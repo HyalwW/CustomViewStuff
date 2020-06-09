@@ -10,6 +10,7 @@ import com.example.customviewstuff.R;
 import com.example.customviewstuff.avChat.viewholders.BaseViewHolder;
 import com.example.customviewstuff.avChat.viewholders.InViewHolder;
 import com.example.customviewstuff.avChat.viewholders.OutViewHolder;
+import com.example.customviewstuff.avChat.viewholders.TimeViewHolder;
 import com.example.customviewstuff.avChat.viewholders.TipViewHolder;
 
 import java.util.List;
@@ -34,6 +35,8 @@ public class ChatAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                 return new OutViewHolder(inflater.inflate(R.layout.item_chat_out, viewGroup, false));
             case ChatBean.TIP:
                 return new TipViewHolder(inflater.inflate(R.layout.item_chat_tip, viewGroup, false));
+            case ChatBean.TIME:
+                return new TimeViewHolder(inflater.inflate(R.layout.item_chat_time, viewGroup, false));
         }
         return null;
     }

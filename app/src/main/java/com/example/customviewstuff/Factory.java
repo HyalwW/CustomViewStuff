@@ -1,8 +1,8 @@
 package com.example.customviewstuff;
 
 import com.example.customviewstuff.activities.ArrowActivity;
+import com.example.customviewstuff.activities.BobbleActivity;
 import com.example.customviewstuff.activities.CartActivity;
-import com.example.customviewstuff.avChat.ChatRoomActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.EyeActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;
@@ -34,6 +34,7 @@ import com.example.customviewstuff.activities.VideoActivity;
 import com.example.customviewstuff.activities.WaveActivity;
 import com.example.customviewstuff.activities.WaveTextActivity;
 import com.example.customviewstuff.activities.WebActivity;
+import com.example.customviewstuff.avChat.ChatRoomActivity;
 import com.example.customviewstuff.customs.soccerGame.SoccerActivity;
 
 import java.util.HashMap;
@@ -78,6 +79,7 @@ public class Factory {
     private static final String TOAST = "toast";
     private static final String STACK = "堆栈";
     private static final String CHAT = "聊天室";
+    private static final String BOBBLE = "泡泡龙";
 
     static {
         caches = new HashMap<>();
@@ -116,6 +118,7 @@ public class Factory {
         caches.put(TOAST, ToastActivity.class);
         caches.put(STACK, StackActivity.class);
         caches.put(CHAT, ChatRoomActivity.class);
+        caches.put(BOBBLE, BobbleActivity.class);
     }
 
     public static Class create(String s) {

@@ -43,6 +43,8 @@ public abstract class Level {
                 return new LevelTwo(width, height, radius);
             case 3:
                 return new LevelThree(width, height, radius);
+            case 4:
+                return new LevelFour(width, height, radius);
             default:
                 return new LevelOne(width, height, radius);
         }
@@ -56,7 +58,7 @@ public abstract class Level {
 
         @Override
         protected int score() {
-            return 150;
+            return 200;
         }
 
         @Override
@@ -95,30 +97,30 @@ public abstract class Level {
 
         @Override
         protected int score() {
-            return 300;
+            return 250;
         }
 
         @Override
         protected float[] shotPosition() {
-            return new float[]{width >> 1, height * 0.9f};
+            return new float[]{width * 0.1f, height * 0.5f};
         }
 
         @Override
         protected void getPath(Path path) {
+            path.reset();
             RectF oval = new RectF();
             float radius = width * 0.1f;
-            path.reset();
-            path.moveTo(width * 0.8f, radius * 2);
-            path.lineTo(width * 0.2f, radius * 2);
-            oval.set(width * 0.1f, radius * 2, width * 0.3f, radius * 4f);
-            path.arcTo(oval, 270, -180);
-            path.lineTo(width * 0.8f, radius * 4f);
-            oval.set(width * 0.7f, radius * 4f, width * 0.9f, radius * 6f);
-            path.arcTo(oval, -90, 180);
-            path.lineTo(width * 0.2f, radius * 6f);
-            oval.set(width * 0.1f, radius * 6f, width * 0.3f, radius * 8f);
-            path.arcTo(oval, 270, -180);
-            path.lineTo(width * 0.9f, radius * 8f);
+            path.moveTo(width * 0.9f, height * 0.2f);
+            path.lineTo(width * 0.9f, height * 0.9f);
+            oval.set(width * 0.7f, height * 0.9f - radius, width * 0.9f, height * 0.9f + radius);
+            path.arcTo(oval, 0, 180);
+            path.lineTo(width * 0.7f, height * 0.2f);
+            oval.set(width * 0.5f, height * 0.2f - radius, width * 0.7f, height * 0.2f + radius);
+            path.arcTo(oval, 0, -180);
+            path.lineTo(width * 0.5f, height * 0.9f);
+            oval.set(width * 0.3f, height * 0.9f - radius, width * 0.5f, height * 0.9f + radius);
+            path.arcTo(oval, 0, 180);
+            path.lineTo(width * 0.3f, height * 0.2f);
         }
 
         @Override
@@ -128,7 +130,7 @@ public abstract class Level {
 
         @Override
         protected float moveIncrement() {
-            return Math.min(width, height) * 0.0008f;
+            return Math.min(width, height) * 0.001f;
         }
     }
 
@@ -140,7 +142,7 @@ public abstract class Level {
 
         @Override
         protected int score() {
-            return 550;
+            return 500;
         }
 
         @Override
@@ -178,6 +180,54 @@ public abstract class Level {
         @Override
         protected float moveIncrement() {
             return Math.min(width, height) * 0.0012f;
+        }
+    }
+
+    private static class LevelFour extends Level {
+
+        LevelFour(int width, int height, float radius) {
+            super(width, height, radius);
+        }
+
+        @Override
+        protected int score() {
+            return 300;
+        }
+
+        @Override
+        protected float[] shotPosition() {
+            return new float[]{width >> 1, height * 0.9f};
+        }
+
+        @Override
+        protected void getPath(Path path) {
+            RectF oval = new RectF();
+            float radius = width * 0.1f;
+            path.reset();
+            path.moveTo(width * 0.8f, radius * 2);
+            path.lineTo(width * 0.2f, radius * 2);
+            oval.set(width * 0.1f, radius * 2, width * 0.3f, radius * 4f);
+            path.arcTo(oval, 270, -180);
+            path.lineTo(width * 0.8f, radius * 4f);
+            oval.set(width * 0.7f, radius * 4f, width * 0.9f, radius * 6f);
+            path.arcTo(oval, -90, 180);
+            path.lineTo(width * 0.2f, radius * 6f);
+            oval.set(width * 0.1f, radius * 6f, width * 0.3f, radius * 8f);
+            path.arcTo(oval, 270, -180);
+            path.lineTo(width * 0.8f, radius * 8f);
+            oval.set(width * 0.7f, radius * 8f, width * 0.9f, radius * 10f);
+            path.arcTo(oval, -90, 180);
+            path.lineTo(width * 0.1f, radius * 10f);
+        }
+
+        @Override
+        protected PathEffect getPathEffect() {
+            return null;
+        }
+
+        @Override
+        protected float moveIncrement() {
+            return Math.min(width, height) * 0.0007f;
         }
     }
 }

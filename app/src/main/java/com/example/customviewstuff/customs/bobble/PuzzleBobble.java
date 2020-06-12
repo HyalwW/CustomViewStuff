@@ -9,6 +9,7 @@ import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.example.customviewstuff.Pool;
@@ -28,13 +29,13 @@ public class PuzzleBobble extends BaseSurfaceView {
     private static final int[] colors = new int[]{0xFFFF1493, 0xFF4B0082, 0xFF1E90FF, 0xFF00FF7F};
     private Path levelPath;
     private PathMeasure measure;
-    private static final long goForwardTime = 300, shotCoolTime = 600;
+    private static final long goForwardTime = 300, shotCoolTime = 300;
     private long createBobbleBetween, createTime;
     private float moveIncrement, radius, forwardIncrement, backwardIncrement, shotIncrement;
     private List<Bobble> bobbles;
     private Pool<Bobble> bobblePool;
     private Random random;
-    private int level, nextLevel, score, targetScore;
+    private int level, score, targetScore;
 
     private Pool<ShotBall> shotBallPool;
     private float baseShotX, baseShotY;
@@ -77,18 +78,15 @@ public class PuzzleBobble extends BaseSurfaceView {
         forwardIncrement = radius * 2 * UPDATE_RATE / goForwardTime;
         backwardIncrement = forwardIncrement * 2f;
         if (level == 0) {
-            levelUp();
+            reset(++level);
         }
         startAnim();
     }
 
-    private void levelUp() {
-        nextLevel += 1;
-        score = 0;
-    }
 
     private void reset(int level) {
         this.level = level;
+        score = 0;
         mLevel = Level.level(level, getMeasuredWidth(), getMeasuredHeight(), radius);
         mLevel.getPath(levelPath);
         measure.setPath(levelPath, false);
@@ -97,7 +95,7 @@ public class PuzzleBobble extends BaseSurfaceView {
         baseShotY = shotPosition[1];
         targetScore = mLevel.score();
         moveIncrement = mLevel.moveIncrement();
-        createBobbleBetween = (long) (2 * radius / moveIncrement * UPDATE_RATE) + UPDATE_RATE;
+        createBobbleBetween = (long) (2 * radius / moveIncrement * UPDATE_RATE);
         for (Bobble bobble : bobbles) {
             bobble.destroy();
         }
@@ -112,64 +110,14 @@ public class PuzzleBobble extends BaseSurfaceView {
     @Override
     protected void onDataUpdate() {
         if (isFail && bobbles.size() == 0) {
-            nextLevel = level = 0;
+            reset(level);
             isFail = false;
-            levelUp();
         }
         if (score >= targetScore) {
-            levelUp();
-        }
-        if (level != nextLevel) {
-            reset(nextLevel);
+            reset(++level);
         }
         handleBobbleMove();
         handleShotBallMove();
-    }
-
-    private void handleShotBallMove() {
-        if (shotBalls.size() == 0) {
-            shotBalls.add(shotBallPool.get());
-        }
-        for (ShotBall shotBall : shotBalls) {
-            shotBall.move();
-            if (shotBall.r < getMeasuredHeight()) {
-                for (int i = bobbles.size() - 1; i >= 0; i--) {
-                    Bobble bobble = bobbles.get(i);
-                    if (distance(bobble.pos[0], bobble.pos[1], shotBall.x, shotBall.y) <= 2 * radius) {
-                        int index = i;
-                        if (index > 0 && index < bobbles.size() - 1) {
-                            Bobble before = bobbles.get(index - 1);
-                            Bobble after = bobbles.get(index + 1);
-                            if (distance(before.pos[0], before.pos[1], shotBall.x, shotBall.y) > distance(after.pos[0], after.pos[1], shotBall.x, shotBall.y)) {
-                                index++;
-                            }
-                        }
-                        Bobble b = bobblePool.get();
-                        b.color = shotBall.color;
-                        b.distance = bobble.distance;
-                        b.forwardDistance = bobble.forwardDistance;
-                        b.backwardDistance = bobble.backwardDistance;
-                        bobbles.add(index, b);
-                        b.needCheck = true;
-                        shotBall.destroy();
-                        shotBalls.remove(shotBall);
-                        for (int j = i + 1; j < bobbles.size(); j++) {
-                            bobbles.get(j).goForward();
-                        }
-                        break;
-                    }
-                }
-            } else {
-                shotBall.destroy();
-                shotBalls.remove(shotBall);
-                score--;
-            }
-        }
-        if (shotBalls.size() > 0) {
-            if (shotBalls.get(0).r != 0) {
-                shotBalls.add(0, shotBallPool.get());
-            }
-        }
     }
 
     private void handleBobbleMove() {
@@ -197,6 +145,79 @@ public class PuzzleBobble extends BaseSurfaceView {
                 }
             }
         }
+        adjustPositions();
+    }
+
+    private void adjustPositions() {
+        if (bobbles.size() > 1) {
+            int index = 1;
+            while (index < bobbles.size() - 1) {
+                Bobble bobble = bobbles.get(index);
+                if (bobble.forwardDistance == 0 && bobble.backwardDistance == 0) {
+                    float d = bobble.distance - bobbles.get(index - 1).distance;
+                    if (d > 2 * radius) {
+                        float b = d - 2 * radius;
+                        for (int i = index; i < bobbles.size(); i++) {
+                            bobbles.get(i).goBackWard(b);
+                        }
+                        break;
+                    } else if (d < 2 * radius) {
+                        float f = 2 * radius - d;
+                        for (int i = index; i < bobbles.size(); i++) {
+                            bobbles.get(i).goForward(f);
+                        }
+                        break;
+                    }
+                }
+                index++;
+            }
+        }
+    }
+
+    private void handleShotBallMove() {
+        if (shotBalls.size() == 0) {
+            shotBalls.add(shotBallPool.get());
+        }
+        for (ShotBall shotBall : shotBalls) {
+            shotBall.move();
+            if (shotBall.r < getMeasuredHeight()) {
+                for (int i = bobbles.size() - 1; i >= 0; i--) {
+                    Bobble bobble = bobbles.get(i);
+                    if (distance(bobble.pos[0], bobble.pos[1], shotBall.x, shotBall.y) <= 2 * radius) {
+                        int index = i;
+                        if (index > 0 && index < bobbles.size() - 1) {
+                            Bobble before = bobbles.get(index - 1);
+                            Bobble after = bobbles.get(index + 1);
+                            if (distance(before.pos[0], before.pos[1], shotBall.x, shotBall.y) > distance(after.pos[0], after.pos[1], shotBall.x, shotBall.y)) {
+                                index++;
+                            }
+                        }
+                        Bobble b = bobblePool.get();
+                        b.color = shotBall.color;
+                        b.distance = bobble.distance;
+                        b.forwardDistance = bobble.forwardDistance;
+                        b.backwardDistance = bobble.backwardDistance;
+                        bobbles.add(index, b);
+                        b.check(1);
+                        shotBall.destroy();
+                        shotBalls.remove(shotBall);
+                        for (int j = i + 1; j < bobbles.size(); j++) {
+                            bobbles.get(j).goForward(radius * 2);
+                        }
+                        break;
+                    }
+                }
+            } else {
+                shotBall.destroy();
+                shotBalls.remove(shotBall);
+                score--;
+            }
+        }
+        if (shotBalls.size() > 0) {
+            if (shotBalls.get(0).r != 0) {
+                shotBalls.add(0, shotBallPool.get());
+            }
+        }
     }
 
     /**
@@ -205,7 +226,8 @@ public class PuzzleBobble extends BaseSurfaceView {
      * @param index
      */
     private void findAndRemove(int index) {
-        int color = bobbles.get(index).color;
+        Bobble select = bobbles.get(index);
+        int color = select.color;
         int fIndex = index, bIndex = index;
         while (fIndex < bobbles.size() - 1 && bobbles.get(fIndex).color == color) {
             fIndex++;
@@ -221,12 +243,12 @@ public class PuzzleBobble extends BaseSurfaceView {
         }
         if (fIndex - bIndex > 1) {
             float backwardDistance = (fIndex - bIndex + 1) * 2 * radius;
-            score += fIndex - bIndex + 1;
+            score += (fIndex - bIndex + 1) * select.combo;
             for (int i = fIndex + 1; i < bobbles.size(); i++) {
                 Bobble bobble = bobbles.get(i);
                 bobble.goBackWard(backwardDistance);
                 if (i == fIndex + 1) {
-                    bobble.needCheck = true;
+                    bobble.check(select.combo + 1);
                 }
             }
             List<Bobble> subList = bobbles.subList(bIndex, fIndex + 1);
@@ -235,6 +257,7 @@ public class PuzzleBobble extends BaseSurfaceView {
             }
             bobbles.removeAll(subList);
         }
+        select.combo = 0;
     }
 
     private float distance(float x1, float y1, float x2, float y2) {
@@ -326,7 +349,7 @@ public class PuzzleBobble extends BaseSurfaceView {
     }
 
     class Bobble implements Reusable {
-        int color;
+        int color, combo;
         float[] pos;
         float distance, forwardDistance, backwardDistance;
         boolean needCheck;
@@ -375,14 +398,16 @@ public class PuzzleBobble extends BaseSurfaceView {
                     backwardDistance = 0;
                 }
             }
-            if (forwardDistance == 0 && backwardDistance == 0 && needCheck) {
-                needCheck = false;
-                findAndRemove(bobbles.indexOf(this));
+            if (forwardDistance == 0 && backwardDistance == 0) {
+                if (needCheck) {
+                    needCheck = false;
+                    findAndRemove(bobbles.indexOf(this));
+                }
             }
         }
 
-        void goForward() {
-            forwardDistance += radius * 2;
+        void goForward(float distance) {
+            forwardDistance += distance;
         }
 
         void goBackWard(float distance) {
@@ -392,6 +417,11 @@ public class PuzzleBobble extends BaseSurfaceView {
         void draw(Canvas canvas, Paint paint) {
             paint.setColor(color);
             canvas.drawCircle(pos[0], pos[1], radius, paint);
+        }
+
+        void check(int combo) {
+            needCheck = true;
+            this.combo = combo;
         }
     }
 

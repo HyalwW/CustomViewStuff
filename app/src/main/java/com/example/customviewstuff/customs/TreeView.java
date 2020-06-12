@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 
 import com.example.customviewstuff.Pool;
+import com.example.customviewstuff.Reusable;
 
 import java.util.List;
 import java.util.Random;
@@ -51,22 +52,7 @@ public class TreeView extends BaseSurfaceView {
         mPaint.setColor(Color.WHITE);
         mPaint.setStyle(Paint.Style.STROKE);
         drawPath = new Path();
-        pool = new Pool<>(2000, new Pool.Creator<Lighting>() {
-            @Override
-            public Lighting instance() {
-                return new Lighting();
-            }
-
-            @Override
-            public void reset(Lighting lighting) {
-
-            }
-
-            @Override
-            public boolean isLeisure(Lighting lighting) {
-                return lighting.time > DURATION;
-            }
-        });
+        pool = new Pool<>(2000, Lighting::new);
     }
 
     @Override
@@ -191,7 +177,7 @@ public class TreeView extends BaseSurfaceView {
         grow = false;
     }
 
-    private class Lighting {
+    private class Lighting implements Reusable {
         private float angle;
         float sx, sy, ex, ey;
         int level, serial;
@@ -238,6 +224,16 @@ public class TreeView extends BaseSurfaceView {
             maxX = Math.max(maxX, ex);
             time += UPDATE_RATE;
             return time > GROW_TIME;
+        }
+
+        @Override
+        public void reset() {
+
+        }
+
+        @Override
+        public boolean isLeisure() {
+            return time > DURATION;
         }
     }
 

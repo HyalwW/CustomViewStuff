@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 
 import com.example.customviewstuff.Pool;
+import com.example.customviewstuff.Reusable;
 
 import java.util.List;
 import java.util.Random;
@@ -46,22 +47,7 @@ public class HexaView extends BaseSurfaceView {
         measure = new PathMeasure();
         random = new Random();
         routes = new CopyOnWriteArrayList<>();
-        pool = new Pool<>(new Pool.Creator<Route>() {
-            @Override
-            public Route instance() {
-                return new Route();
-            }
-
-            @Override
-            public void reset(Route route) {
-                route.reset();
-            }
-
-            @Override
-            public boolean isLeisure(Route route) {
-                return route.pos > route.total;
-            }
-        });
+        pool = new Pool<>(Route::new);
 
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -128,7 +114,7 @@ public class HexaView extends BaseSurfaceView {
         draw = false;
     }
 
-    private class Route {
+    private class Route implements Reusable {
         Path mPath;
         float increment, pos, length, total;
         int color;
@@ -137,12 +123,18 @@ public class HexaView extends BaseSurfaceView {
             reset();
         }
 
-        void reset() {
+        @Override
+        public void reset() {
             mPath = getPath();
             increment = randomIncrement();
             this.length = randomLength();
             this.pos = -length;
             color = randomColor();
+        }
+
+        @Override
+        public boolean isLeisure() {
+            return pos > total;
         }
 
         void move() {

@@ -5,12 +5,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import com.example.customviewstuff.Pool;
+import com.example.customviewstuff.Reusable;
 import com.example.customviewstuff.customs.BaseSurfaceView;
 
 import java.util.List;
@@ -20,22 +22,25 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by Wang.Wenhui
  * Date: 2020/6/11
- * Description: blablabla
+ * Description: 泡泡龙游戏，目前只有第一关
  */
 public class PuzzleBobble extends BaseSurfaceView {
-    private static final int[] colors = new int[]{0xFFFF1493, 0xFF4B0082, 0xFF1E90FF, 0xFF00FF7F, 0xFFFF1493, 0xFFFF1493};
+    private static final int[] colors = new int[]{0xFFFF1493, 0xFF4B0082, 0xFF1E90FF, 0xFF00FF7F};
     private Path levelPath;
     private PathMeasure measure;
-    private static final long goForwardTime = 300, shotCoolTime = 1000;
-    private float moveIncrement, baseIncrement, radius, forwardIncrement, backwardIncrement, shotIncrement;
+    private static final long goForwardTime = 300, shotCoolTime = 600;
+    private long createBobbleBetween, createTime;
+    private float moveIncrement, radius, forwardIncrement, backwardIncrement, shotIncrement;
     private List<Bobble> bobbles;
-    private Pool<Bobble> pool;
+    private Pool<Bobble> bobblePool;
     private Random random;
-    private int level, nextLevel;
+    private int level, nextLevel, score, targetScore;
 
-
+    private Pool<ShotBall> shotBallPool;
+    private float baseShotX, baseShotY;
     private List<ShotBall> shotBalls;
     private long lastShotTime;
+    private Level mLevel;
 
     private boolean isFail;
 
@@ -58,30 +63,19 @@ public class PuzzleBobble extends BaseSurfaceView {
         bobbles = new CopyOnWriteArrayList<>();
         shotBalls = new CopyOnWriteArrayList<>();
         random = new Random();
-        pool = new Pool<>(new Pool.Creator<Bobble>() {
-            @Override
-            public Bobble instance() {
-                return new Bobble();
-            }
-
-            @Override
-            public void reset(Bobble bobble) {
-                bobble.reset();
-            }
-
-            @Override
-            public boolean isLeisure(Bobble bobble) {
-                return bobble.distance == -1;
-            }
-        });
+        bobblePool = new Pool<>(Bobble::new);
+        shotBallPool = new Pool<>(ShotBall::new);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        mPaint.setFakeBoldText(true);
     }
 
     @Override
     protected void onReady() {
-        moveIncrement = baseIncrement = Math.min(getMeasuredWidth(), getMeasuredHeight()) * 0.0012f;
-        shotIncrement = Math.min(getMeasuredWidth(), getMeasuredHeight()) * 0.04f;
-        radius = Math.min(getMeasuredWidth(), getMeasuredHeight()) * 0.03f;
+        int min = Math.min(getMeasuredWidth(), getMeasuredHeight());
+        shotIncrement = min * 0.04f;
+        radius = min * 0.03f;
         forwardIncrement = radius * 2 * UPDATE_RATE / goForwardTime;
+        backwardIncrement = forwardIncrement * 2f;
         if (level == 0) {
             levelUp();
         }
@@ -90,50 +84,55 @@ public class PuzzleBobble extends BaseSurfaceView {
 
     private void levelUp() {
         nextLevel += 1;
+        score = 0;
     }
 
     private void reset(int level) {
-        levelPath.reset();
-        Level.level(level, getMeasuredWidth(), getMeasuredHeight(), radius).getPath(levelPath);
+        this.level = level;
+        mLevel = Level.level(level, getMeasuredWidth(), getMeasuredHeight(), radius);
+        mLevel.getPath(levelPath);
         measure.setPath(levelPath, false);
+        float[] shotPosition = mLevel.shotPosition();
+        baseShotX = shotPosition[0];
+        baseShotY = shotPosition[1];
+        targetScore = mLevel.score();
+        moveIncrement = mLevel.moveIncrement();
+        createBobbleBetween = (long) (2 * radius / moveIncrement * UPDATE_RATE) + UPDATE_RATE;
         for (Bobble bobble : bobbles) {
             bobble.destroy();
         }
         bobbles.clear();
+        for (ShotBall shotBall : shotBalls) {
+            shotBall.destroy();
+        }
+        shotBalls.clear();
         isFail = false;
-        moveIncrement = baseIncrement;
     }
 
     @Override
     protected void onDataUpdate() {
+        if (isFail && bobbles.size() == 0) {
+            nextLevel = level = 0;
+            isFail = false;
+            levelUp();
+        }
+        if (score >= targetScore) {
+            levelUp();
+        }
         if (level != nextLevel) {
-            reset(++level);
+            reset(nextLevel);
         }
-        if (!isFail) {
-            if (bobbles.size() == 0) {
-                bobbles.add(pool.get());
-            } else {
-                if (bobbles.get(0).distance >= radius * 2) {
-                    bobbles.add(0, pool.get());
-                }
-            }
-        }
-        for (Bobble bobble : bobbles) {
-            bobble.move();
-            if (bobble.distance >= measure.getLength()) {
-                bobbles.remove(bobble);
-                if (!isFail) {
-                    isFail = true;
-                    moveIncrement = baseIncrement * 10;
-                }
-            }
-        }
+        handleBobbleMove();
+        handleShotBallMove();
+    }
+
+    private void handleShotBallMove() {
         if (shotBalls.size() == 0) {
-            shotBalls.add(new ShotBall());
+            shotBalls.add(shotBallPool.get());
         }
         for (ShotBall shotBall : shotBalls) {
             shotBall.move();
-            if (distance(shotBall.x, shotBall.y, getMeasuredWidth() / 2f, getMeasuredHeight() / 2f) < getMeasuredHeight()) {
+            if (shotBall.r < getMeasuredHeight()) {
                 for (int i = bobbles.size() - 1; i >= 0; i--) {
                     Bobble bobble = bobbles.get(i);
                     if (distance(bobble.pos[0], bobble.pos[1], shotBall.x, shotBall.y) <= 2 * radius) {
@@ -145,10 +144,14 @@ public class PuzzleBobble extends BaseSurfaceView {
                                 index++;
                             }
                         }
-                        Bobble b = pool.get();
+                        Bobble b = bobblePool.get();
                         b.color = shotBall.color;
                         b.distance = bobble.distance;
+                        b.forwardDistance = bobble.forwardDistance;
+                        b.backwardDistance = bobble.backwardDistance;
                         bobbles.add(index, b);
+                        b.needCheck = true;
+                        shotBall.destroy();
                         shotBalls.remove(shotBall);
                         for (int j = i + 1; j < bobbles.size(); j++) {
                             bobbles.get(j).goForward();
@@ -157,11 +160,80 @@ public class PuzzleBobble extends BaseSurfaceView {
                     }
                 }
             } else {
+                shotBall.destroy();
                 shotBalls.remove(shotBall);
+                score--;
             }
         }
-        if (shotBalls.get(0).r != 0) {
-            shotBalls.add(0, new ShotBall());
+        if (shotBalls.size() > 0) {
+            if (shotBalls.get(0).r != 0) {
+                shotBalls.add(0, shotBallPool.get());
+            }
+        }
+    }
+
+    private void handleBobbleMove() {
+        if (!isFail) {
+            if (bobbles.size() == 0) {
+                bobbles.add(bobblePool.get());
+                createTime = System.currentTimeMillis();
+            } else {
+                long now = System.currentTimeMillis();
+                if (bobbles.get(0).distance >= radius * 2) {
+                    if (now - createTime >= createBobbleBetween) {
+                        bobbles.add(0, bobblePool.get());
+                        createTime = now;
+                    }
+                }
+            }
+        }
+        for (Bobble bobble : bobbles) {
+            bobble.move();
+            if (bobble.distance >= measure.getLength()) {
+                bobbles.remove(bobble);
+                if (!isFail) {
+                    isFail = true;
+                    moveIncrement *= 12;
+                }
+            }
+        }
+    }
+
+    /**
+     * 从index开始左右两边开始找相同颜色的球
+     *
+     * @param index
+     */
+    private void findAndRemove(int index) {
+        int color = bobbles.get(index).color;
+        int fIndex = index, bIndex = index;
+        while (fIndex < bobbles.size() - 1 && bobbles.get(fIndex).color == color) {
+            fIndex++;
+        }
+        if (bobbles.get(fIndex).color != color) {
+            fIndex--;
+        }
+        while (bIndex > 0 && bobbles.get(bIndex).color == color) {
+            bIndex--;
+        }
+        if (bobbles.get(bIndex).color != color) {
+            bIndex++;
+        }
+        if (fIndex - bIndex > 1) {
+            float backwardDistance = (fIndex - bIndex + 1) * 2 * radius;
+            score += fIndex - bIndex + 1;
+            for (int i = fIndex + 1; i < bobbles.size(); i++) {
+                Bobble bobble = bobbles.get(i);
+                bobble.goBackWard(backwardDistance);
+                if (i == fIndex + 1) {
+                    bobble.needCheck = true;
+                }
+            }
+            List<Bobble> subList = bobbles.subList(bIndex, fIndex + 1);
+            for (Bobble bobble : subList) {
+                bobble.destroy();
+            }
+            bobbles.removeAll(subList);
         }
     }
 
@@ -171,19 +243,48 @@ public class PuzzleBobble extends BaseSurfaceView {
 
     @Override
     protected void onRefresh(Canvas canvas) {
+        drawPath(canvas);
+        drawBobbles(canvas);
+        drawShotBalls(canvas);
+        drawScore(canvas);
+    }
+
+    private void drawPath(Canvas canvas) {
         canvas.drawColor(Color.WHITE);
         mPaint.setStrokeWidth(10f);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setColor(Color.CYAN);
         mPaint.setStyle(Paint.Style.STROKE);
+        PathEffect effect = mLevel.getPathEffect();
+        if (mLevel != null && effect != null) {
+            mPaint.setPathEffect(effect);
+        }
         canvas.drawPath(levelPath, mPaint);
+        mPaint.setPathEffect(null);
+    }
+
+    private void drawBobbles(Canvas canvas) {
         mPaint.setStyle(Paint.Style.FILL);
         for (Bobble bobble : bobbles) {
             bobble.draw(canvas, mPaint);
         }
+    }
+
+    private void drawShotBalls(Canvas canvas) {
+        mPaint.setStyle(Paint.Style.FILL);
         for (ShotBall shotBall : shotBalls) {
             shotBall.draw(canvas, mPaint);
         }
+    }
+
+    private void drawScore(Canvas canvas) {
+        mPaint.setColor(Color.RED);
+        float min = Math.min(getMeasuredWidth(), getMeasuredHeight());
+        mPaint.setTextSize(min * 0.06f);
+        canvas.drawText("得分：" + score, getMeasuredWidth() >> 1, min * 0.08f, mPaint);
+        mPaint.setColor(0xFFFF8C00);
+        mPaint.setTextSize(min * 0.04f);
+        canvas.drawText("目标分数：" + targetScore, getMeasuredWidth() >> 1, min * 0.14f, mPaint);
     }
 
     @Override
@@ -211,7 +312,7 @@ public class PuzzleBobble extends BaseSurfaceView {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                shotDirection = Math.atan2(eventY - getMeasuredHeight() / 2f, eventX - getMeasuredWidth() / 2f);
+                shotDirection = Math.atan2(eventY - baseShotY, eventX - baseShotX);
                 break;
             case MotionEvent.ACTION_UP:
                 long nowTime = System.currentTimeMillis();
@@ -224,35 +325,59 @@ public class PuzzleBobble extends BaseSurfaceView {
         return true;
     }
 
-    class Bobble {
+    class Bobble implements Reusable {
         int color;
         float[] pos;
         float distance, forwardDistance, backwardDistance;
+        boolean needCheck;
 
         Bobble() {
             pos = new float[2];
             reset();
         }
 
-        void reset() {
+        @Override
+        public void reset() {
             distance = 0;
             color = colors[random.nextInt(colors.length)];
         }
 
+        @Override
+        public boolean isLeisure() {
+            return distance == -1;
+        }
+
         void destroy() {
             distance = -1;
+            needCheck = false;
+            pos[0] = pos[1] = 0;
+            forwardDistance = backwardDistance = 0;
         }
 
         void move() {
             distance += moveIncrement;
             measure.getPosTan(distance, pos, null);
             if (forwardDistance > 0) {
-                distance += forwardIncrement;
-                forwardDistance -= forwardIncrement;
+                if (forwardDistance > forwardIncrement) {
+                    distance += forwardIncrement;
+                    forwardDistance -= forwardIncrement;
+                } else {
+                    distance += forwardDistance;
+                    forwardDistance = 0;
+                }
             }
             if (backwardDistance > 0) {
-                distance -= backwardIncrement;
-                backwardDistance -= backwardIncrement;
+                if (backwardDistance > backwardIncrement) {
+                    distance -= backwardIncrement;
+                    backwardDistance -= backwardIncrement;
+                } else {
+                    distance -= backwardDistance;
+                    backwardDistance = 0;
+                }
+            }
+            if (forwardDistance == 0 && backwardDistance == 0 && needCheck) {
+                needCheck = false;
+                findAndRemove(bobbles.indexOf(this));
             }
         }
 
@@ -265,13 +390,12 @@ public class PuzzleBobble extends BaseSurfaceView {
         }
 
         void draw(Canvas canvas, Paint paint) {
-            paint.setStyle(Paint.Style.FILL);
             paint.setColor(color);
             canvas.drawCircle(pos[0], pos[1], radius, paint);
         }
     }
 
-    class ShotBall {
+    class ShotBall implements Reusable {
         int color;
         double direction;
         float r, x, y;
@@ -280,25 +404,36 @@ public class PuzzleBobble extends BaseSurfaceView {
             reset();
         }
 
-        void reset() {
+        @Override
+        public void reset() {
             color = colors[random.nextInt(colors.length)];
             direction = 99999;
             r = 0;
-            x = getMeasuredWidth() / 2f;
-            y = getMeasuredHeight() / 2f;
+            x = baseShotX;
+            y = baseShotY;
+        }
+
+        @Override
+        public boolean isLeisure() {
+            return r == 999999;
         }
 
         void move() {
             if (direction != 99999) {
                 r += shotIncrement;
-                x = (float) ((getMeasuredWidth() >> 1) + r * Math.cos(direction));
-                y = (float) ((getMeasuredHeight() >> 1) + r * Math.sin(direction));
+                x = (float) (baseShotX + r * Math.cos(direction));
+                y = (float) (baseShotY + r * Math.sin(direction));
             }
         }
 
         void draw(Canvas canvas, Paint paint) {
             paint.setColor(color);
             canvas.drawCircle(x, y, radius, paint);
+        }
+
+        void destroy() {
+            r = 999999;
+            direction = 99999;
         }
     }
 

@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import com.example.customviewstuff.Pool;
+import com.example.customviewstuff.Reusable;
 
 import java.util.List;
 import java.util.Random;
@@ -44,22 +45,7 @@ public class FadeAwayView extends BaseSurfaceView {
         pos = new float[2];
         random = new Random();
         stars = new CopyOnWriteArrayList<>();
-        pool = new Pool<>(new Pool.Creator<Star>() {
-            @Override
-            public Star instance() {
-                return new Star(0, 0, 9999);
-            }
-
-            @Override
-            public void reset(Star star) {
-                star.reset(0, 0, 9999);
-            }
-
-            @Override
-            public boolean isLeisure(Star star) {
-                return star.curTime >= star.duration;
-            }
-        });
+        pool = new Pool<>(() -> new Star(0, 0, 9999));
     }
 
     @Override
@@ -105,7 +91,7 @@ public class FadeAwayView extends BaseSurfaceView {
         return false;
     }
 
-    private class Star {
+    private class Star implements Reusable {
         float x, y, radius;
         int color;
         long curTime, duration;
@@ -143,6 +129,16 @@ public class FadeAwayView extends BaseSurfaceView {
             } else {
                 curTime = duration;
             }
+        }
+
+        @Override
+        public void reset() {
+            reset(0, 0, 9999);
+        }
+
+        @Override
+        public boolean isLeisure() {
+            return curTime >= duration;
         }
     }
 

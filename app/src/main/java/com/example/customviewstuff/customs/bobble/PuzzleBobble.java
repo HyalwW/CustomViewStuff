@@ -44,6 +44,11 @@ public class PuzzleBobble extends BaseSurfaceView {
     private Level mLevel;
 
     private boolean isFail;
+    private PathEffect effect;
+
+    private boolean isCustom;
+    private int customState;
+    private CustomLevel customLevel;
 
     public PuzzleBobble(Context context) {
         super(context);
@@ -68,6 +73,7 @@ public class PuzzleBobble extends BaseSurfaceView {
         shotBallPool = new Pool<>(ShotBall::new);
         mPaint.setTextAlign(Paint.Align.CENTER);
         mPaint.setFakeBoldText(true);
+        score = -1;
     }
 
     @Override
@@ -85,9 +91,29 @@ public class PuzzleBobble extends BaseSurfaceView {
 
 
     private void reset(int level) {
+        if (level > 5) {
+            level = 5;
+        }
         this.level = level;
         score = 0;
-        mLevel = Level.level(level, getMeasuredWidth(), getMeasuredHeight(), radius);
+        if (!isCustom) {
+            mLevel = Level.level(level, getMeasuredWidth(), getMeasuredHeight(), radius);
+        }
+        if (!isCustom && mLevel instanceof CustomLevel) {
+            isCustom = true;
+            customLevel = (CustomLevel) mLevel;
+            levelPath.reset();
+            stopAnim();
+            callDraw("custom");
+        }
+        if (isCustom) {
+            if (!customLevel.isReady()) {
+                customState = 1;
+                return;
+            } else {
+                isCustom = false;
+            }
+        }
         mLevel.getPath(levelPath);
         measure.setPath(levelPath, false);
         float[] shotPosition = mLevel.shotPosition();
@@ -96,6 +122,7 @@ public class PuzzleBobble extends BaseSurfaceView {
         targetScore = mLevel.score();
         moveIncrement = mLevel.moveIncrement();
         createBobbleBetween = (long) (2 * radius / moveIncrement * UPDATE_RATE);
+        effect = mLevel.getPathEffect();
         for (Bobble bobble : bobbles) {
             bobble.destroy();
         }
@@ -105,19 +132,22 @@ public class PuzzleBobble extends BaseSurfaceView {
         }
         shotBalls.clear();
         isFail = false;
+        customLevel = null;
     }
 
     @Override
     protected void onDataUpdate() {
-        if (isFail && bobbles.size() == 0) {
-            reset(level);
-            isFail = false;
+        if (!isCustom) {
+            if (isFail && bobbles.size() == 0) {
+                reset(level);
+                isFail = false;
+            }
+            if (score >= targetScore) {
+                reset(++level);
+            }
+            handleBobbleMove();
+            handleShotBallMove();
         }
-        if (score >= targetScore) {
-            reset(++level);
-        }
-        handleBobbleMove();
-        handleShotBallMove();
     }
 
     private void handleBobbleMove() {
@@ -266,6 +296,7 @@ public class PuzzleBobble extends BaseSurfaceView {
 
     @Override
     protected void onRefresh(Canvas canvas) {
+        canvas.drawColor(Color.WHITE);
         drawPath(canvas);
         drawBobbles(canvas);
         drawShotBalls(canvas);
@@ -273,12 +304,10 @@ public class PuzzleBobble extends BaseSurfaceView {
     }
 
     private void drawPath(Canvas canvas) {
-        canvas.drawColor(Color.WHITE);
         mPaint.setStrokeWidth(10f);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setColor(Color.CYAN);
         mPaint.setStyle(Paint.Style.STROKE);
-        PathEffect effect = mLevel.getPathEffect();
         if (mLevel != null && effect != null) {
             mPaint.setPathEffect(effect);
         }
@@ -312,7 +341,18 @@ public class PuzzleBobble extends BaseSurfaceView {
 
     @Override
     protected void draw(Canvas canvas, Object data) {
-
+        clearCanvas(canvas);
+        canvas.drawColor(Color.WHITE);
+        mPaint.setColor(Color.BLACK);
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setTextSize(getMeasuredWidth() * 0.08f);
+        canvas.drawText(customState == 1 ? "请一笔画完整条路线" : "请选择发射台位置", getMeasuredWidth() >> 1, getMeasuredHeight() * 0.05f, mPaint);
+        drawPath(canvas);
+        if (customState == 2) {
+            mPaint.setColor(Color.BLACK);
+            mPaint.setStyle(Paint.Style.FILL);
+            canvas.drawCircle(baseShotX, baseShotY, radius, mPaint);
+        }
     }
 
     @Override
@@ -329,21 +369,59 @@ public class PuzzleBobble extends BaseSurfaceView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (isFail) return false;
-        float eventX = event.getX();
-        float eventY = event.getY();
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                shotDirection = Math.atan2(eventY - baseShotY, eventX - baseShotX);
-                break;
-            case MotionEvent.ACTION_UP:
-                long nowTime = System.currentTimeMillis();
-                if (nowTime - lastShotTime > shotCoolTime) {
-                    shotBalls.get(0).direction = shotDirection;
-                    lastShotTime = nowTime;
-                }
-                break;
+        if (!isCustom) {
+            if (isFail) return false;
+            float eventX = event.getX();
+            float eventY = event.getY();
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_MOVE:
+                    shotDirection = Math.atan2(eventY - baseShotY, eventX - baseShotX);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    long nowTime = System.currentTimeMillis();
+                    if (nowTime - lastShotTime > shotCoolTime) {
+                        shotBalls.get(0).direction = shotDirection;
+                        lastShotTime = nowTime;
+                    }
+                    break;
+            }
+        } else {
+            float eventX = event.getX();
+            float eventY = event.getY();
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (customState == 1) {
+                        levelPath.reset();
+                        levelPath.moveTo(eventX, eventY);
+                    } else {
+                        baseShotX = eventX;
+                        baseShotY = eventY;
+                    }
+                    callDraw("custom");
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (customState == 1) {
+                        levelPath.lineTo(eventX, eventY);
+                    } else {
+                        baseShotX = eventX;
+                        baseShotY = eventY;
+                    }
+                    callDraw("custom");
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (customState == 1) {
+                        baseShotX = baseShotY = -9999;
+                        customState = 2;
+                        customLevel.setPath(levelPath);
+                        callDraw("custom");
+                    } else {
+                        customLevel.setCenter(eventX, eventY);
+                        reset(level);
+                        startAnim();
+                    }
+                    break;
+            }
         }
         return true;
     }

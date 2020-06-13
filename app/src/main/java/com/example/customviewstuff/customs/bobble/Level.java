@@ -45,6 +45,8 @@ public abstract class Level {
                 return new LevelThree(width, height, radius);
             case 4:
                 return new LevelFour(width, height, radius);
+            case 5:
+                return new CustomLevel(width, height, radius);
             default:
                 return new LevelOne(width, height, radius);
         }

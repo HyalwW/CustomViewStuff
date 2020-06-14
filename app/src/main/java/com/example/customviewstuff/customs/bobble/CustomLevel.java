@@ -7,6 +7,7 @@ public class CustomLevel extends Level {
     private float[] center;
     private Path path;
     private boolean isReady;
+    private int score;
 
     CustomLevel(int width, int height, float radius) {
         super(width, height, radius);
@@ -14,7 +15,7 @@ public class CustomLevel extends Level {
 
     @Override
     protected int score() {
-        return 400;
+        return score;
     }
 
     @Override
@@ -38,7 +39,11 @@ public class CustomLevel extends Level {
         return Math.min(width, height) * 0.001f;
     }
 
-    public void setPath(Path p) {
+    public void setPath(Path p, float length) {
+        score = (int) (length / 18);
+        if (score < 50) {
+            score = 50;
+        }
         this.path = new Path();
         path.addPath(p);
         if (center != null) {

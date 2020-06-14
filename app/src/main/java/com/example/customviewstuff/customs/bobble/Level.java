@@ -1,6 +1,7 @@
 package com.example.customviewstuff.customs.bobble;
 
 import android.graphics.Path;
+import android.graphics.PathDashPathEffect;
 import android.graphics.PathEffect;
 import android.graphics.RectF;
 
@@ -12,11 +13,19 @@ import android.graphics.RectF;
 public abstract class Level {
     protected int width, height;
     protected float radius;
+    protected PathEffect defEffect;
 
     Level(int width, int height, float radius) {
         this.width = width;
         this.height = height;
         this.radius = radius;
+        Path shape = new Path();
+        float min = Math.min(width, height);
+        shape.moveTo(0, -min * 0.01f);
+        shape.lineTo(min * 0.01f,  0);
+        shape.lineTo(0, min * 0.01f);
+        shape.close();
+        defEffect = new PathDashPathEffect(shape, min * 0.015f, 0, PathDashPathEffect.Style.MORPH);
     }
 
     //目标分数
@@ -83,7 +92,7 @@ public abstract class Level {
 
         @Override
         protected PathEffect getPathEffect() {
-            return null;
+            return defEffect;
         }
 
         @Override
@@ -127,7 +136,7 @@ public abstract class Level {
 
         @Override
         protected PathEffect getPathEffect() {
-            return null;
+            return defEffect;
         }
 
         @Override
@@ -176,7 +185,7 @@ public abstract class Level {
 
         @Override
         protected PathEffect getPathEffect() {
-            return null;
+            return defEffect;
         }
 
         @Override
@@ -224,7 +233,7 @@ public abstract class Level {
 
         @Override
         protected PathEffect getPathEffect() {
-            return null;
+            return defEffect;
         }
 
         @Override

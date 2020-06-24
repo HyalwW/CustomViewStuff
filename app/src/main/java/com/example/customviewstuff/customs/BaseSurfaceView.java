@@ -213,7 +213,18 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
 
     //注意死循环线程
     public void doInThread(Runnable runnable) {
-        builder.newMsg().what(RUN_ON_THREAD).obj(runnable).send();
+        doInThread(runnable, false);
+    }
+
+    //注意死循环线程
+    public void doInThread(Runnable runnable, boolean forceRun) {
+        if (isAlive) {
+            builder.newMsg().what(RUN_ON_THREAD).obj(runnable).send();
+        } else {
+            if (forceRun) {
+                threadPool.execute(runnable);
+            }
+        }
     }
 
     /**

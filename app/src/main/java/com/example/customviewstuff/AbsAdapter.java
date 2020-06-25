@@ -31,7 +31,7 @@ public abstract class AbsAdapter<T> extends RecyclerView.Adapter<AbsViewHolder<T
 
     @Override
     public void onBindViewHolder(@NonNull AbsViewHolder<T, ?> holder, int position) {
-        holder.bind(list.get(position), position);
+        holder.bind(list.get(position), position, list.size());
     }
 
     @Override

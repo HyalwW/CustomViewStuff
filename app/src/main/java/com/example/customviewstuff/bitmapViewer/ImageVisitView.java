@@ -9,6 +9,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.VelocityTracker;
 
 import com.example.customviewstuff.customs.BaseSurfaceView;
 
@@ -19,9 +21,12 @@ import com.example.customviewstuff.customs.BaseSurfaceView;
  */
 public class ImageVisitView extends BaseSurfaceView {
     private Bitmap img;
-    private RectF imgRect;
+    private RectF dstRect;
     private float baseScale, scale;
     private PointF center;
+
+    private float xInc, yInc, sub;
+    private VelocityTracker tracker;
 
     public ImageVisitView(Context context) {
         super(context);
@@ -37,12 +42,14 @@ public class ImageVisitView extends BaseSurfaceView {
 
     @Override
     protected void onInit() {
-        imgRect = new RectF();
+        dstRect = new RectF();
         center = new PointF();
+        tracker = VelocityTracker.obtain();
     }
 
     @Override
     protected void onReady() {
+        sub = Math.min(getMeasuredWidth(), getMeasuredHeight()) * 0.001f;
         if (img != null) {
             setBitmap(img, false);
         }
@@ -50,7 +57,42 @@ public class ImageVisitView extends BaseSurfaceView {
 
     @Override
     protected void onDataUpdate() {
-
+        if (img != null) {
+            if (xInc != 0) {
+                if (xInc > 0) {
+                    xInc -= sub;
+                    if (xInc < 0) {
+                        xInc = 0;
+                    }
+                } else {
+                    xInc += sub;
+                    if (xInc > 0) {
+                        xInc = 0;
+                    }
+                }
+                center.x += xInc;
+            }
+            if (yInc != 0) {
+                if (yInc > 0) {
+                    yInc -= sub;
+                    if (yInc < 0) {
+                        yInc = 0;
+                    }
+                } else {
+                    yInc += sub;
+                    if (yInc > 0) {
+                        yInc = 0;
+                    }
+                }
+                center.y += yInc;
+            } else {
+                yInc = 0;
+            }
+            setRect();
+            if (xInc == 0 && yInc == 0) {
+                checkBounds();
+            }
+        }
     }
 
     @Override
@@ -61,7 +103,10 @@ public class ImageVisitView extends BaseSurfaceView {
     @Override
     protected void draw(Canvas canvas, Object data) {
         if (img != null && !img.isRecycled()) {
-            canvas.drawBitmap(img, null, imgRect, mPaint);
+            canvas.drawBitmap(img, null, dstRect, null);
+            if (xInc != 0 || yInc != 0) {
+                callDraw("");
+            }
         }
     }
 
@@ -87,13 +132,12 @@ public class ImageVisitView extends BaseSurfaceView {
         }
         img = Bitmap.createBitmap(bitmap);
         if (isAlive) {
-            if (img.getHeight() > img.getWidth()) {
+            if (img.getHeight() < img.getWidth()) {
                 scale = baseScale = (float) getMeasuredHeight() / img.getHeight();
             } else {
                 scale = baseScale = (float) getMeasuredWidth() / img.getWidth();
             }
             center.set(getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
-            setRect();
             callDraw("");
         }
     }
@@ -107,7 +151,7 @@ public class ImageVisitView extends BaseSurfaceView {
 
     private float d1x, d1y, d2x, d2y;
     private float blength;
-    private boolean doubleTouch;
+    private boolean doubleTouch, onTouch;
     private PointF temp = new PointF();
     private float tempScale;
 
@@ -121,10 +165,12 @@ public class ImageVisitView extends BaseSurfaceView {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
+                onTouch = true;
                 if (id == 0) {
                     d1x = event.getX(0);
                     d1y = event.getY(0);
                     temp.set(center);
+                    xInc = yInc = 0;
                 } else if (id == 1) {
                     d2x = event.getX(1);
                     d2y = event.getY(1);
@@ -139,8 +185,8 @@ public class ImageVisitView extends BaseSurfaceView {
                     if (scale == baseScale) {
                         parentMove(true);
                     } else {
+                        tracker.addMovement(event);
                         center.set(temp.x + (event.getX(0) - d1x), temp.y + (event.getY(0) - d1y));
-                        setRect();
                         callDraw("");
                     }
                 } else if (event.getPointerCount() > 1) {
@@ -157,19 +203,25 @@ public class ImageVisitView extends BaseSurfaceView {
                     float lLength = distance(temp.x, temp.y, vx, vy);
                     //重新获取新的bitmap中点位置
                     center.set(temp.x + ((float) (Math.cos(angle) * scaleIncrement * lLength)), temp.y + (float) (Math.sin(angle) * scaleIncrement * lLength));
-                    setRect();
                     callDraw("");
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
+                if (!doubleTouch) {
+                    tracker.computeCurrentVelocity((int) UPDATE_RATE, getMeasuredWidth() * 0.04f);
+                    xInc = tracker.getXVelocity();
+                    yInc = tracker.getYVelocity();
+                }
                 if (scale < baseScale) {
                     scale = baseScale;
                 }
-                checkBounds();
+                callDraw("");
                 if (event.getPointerCount() == 1) {
                     d1x = d1y = d2x = d2y = 0;
                     doubleTouch = false;
+                    onTouch = false;
+                    tracker.clear();
                 }
                 break;
         }
@@ -177,18 +229,16 @@ public class ImageVisitView extends BaseSurfaceView {
     }
 
     private void checkBounds() {
-        if (imgRect.left < 0 && imgRect.right < getMeasuredWidth()) {
-            center.x += Math.min(-imgRect.left, getMeasuredWidth() - imgRect.right);
-        } else if (imgRect.left > 0 && imgRect.right > getMeasuredWidth()) {
-            center.x -= Math.min(imgRect.left, imgRect.right - getMeasuredWidth());
+        if (dstRect.left < 0 && dstRect.right < getMeasuredWidth()) {
+            center.x += Math.min(-dstRect.left, getMeasuredWidth() - dstRect.right);
+        } else if (dstRect.left > 0 && dstRect.right > getMeasuredWidth()) {
+            center.x -= Math.min(dstRect.left, dstRect.right - getMeasuredWidth());
         }
-        if (imgRect.top < 0 && imgRect.bottom < getMeasuredHeight()) {
-            center.y += Math.min(-imgRect.top, getMeasuredHeight() - imgRect.bottom);
-        } else if (imgRect.top > 0 && imgRect.bottom > getMeasuredHeight()) {
-            center.y -= Math.min(imgRect.top, imgRect.bottom - getMeasuredHeight());
+        if (dstRect.top < 0 && dstRect.bottom < getMeasuredHeight()) {
+            center.y += Math.min(-dstRect.top, getMeasuredHeight() - dstRect.bottom);
+        } else if (dstRect.top > 0 && dstRect.bottom > getMeasuredHeight()) {
+            center.y -= Math.min(dstRect.top, dstRect.bottom - getMeasuredHeight());
         }
-        setRect();
-        callDraw("");
     }
 
     private void parentMove(boolean move) {
@@ -202,6 +252,6 @@ public class ImageVisitView extends BaseSurfaceView {
     private void setRect() {
         float fx = img.getWidth() * scale / 2;
         float fy = img.getHeight() * scale / 2;
-        imgRect.set(center.x - fx, center.y - fy, center.x + fx, center.y + fy);
+        dstRect.set(center.x - fx, center.y - fy, center.x + fx, center.y + fy);
     }
 }

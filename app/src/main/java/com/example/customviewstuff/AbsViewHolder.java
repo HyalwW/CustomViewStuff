@@ -22,5 +22,5 @@ public abstract class AbsViewHolder<T, DB extends ViewDataBinding> extends Recyc
 
     protected abstract void initView(View itemView);
 
-    public abstract void bind(T item, int position);
+    public abstract void bind(T item, int position, int size);
 }

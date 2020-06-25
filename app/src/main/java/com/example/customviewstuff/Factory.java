@@ -81,7 +81,7 @@ public class Factory {
     private static final String STACK = "堆栈";
     private static final String CHAT = "聊天室";
     private static final String BOBBLE = "泡泡龙";
-    private static final String IMAGE_VIEW = "图片查看器";
+    private static final String IMAGE_VIEW = "PDF查看器";
 
     static {
         caches = new HashMap<>();

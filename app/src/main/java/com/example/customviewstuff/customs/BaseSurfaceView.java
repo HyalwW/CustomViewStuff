@@ -33,7 +33,7 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
     protected SurfaceHolder holder;
     protected long UPDATE_RATE = 16;
     protected Paint mPaint;
-    protected boolean running = true, isDrawing = false, isAlive;
+    protected volatile boolean running = true, isDrawing = false, isAlive;
     private List<Runnable> queue;
     private LifecycleListener listener;
     private ExecutorService threadPool;

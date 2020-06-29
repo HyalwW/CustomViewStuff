@@ -1,6 +1,7 @@
 package com.example.customviewstuff.activities;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.example.customviewstuff.BaseActivity;
@@ -24,7 +25,13 @@ public class TextAnimActivity extends BaseActivity<ActivityTextAnimBinding> impl
         switch (v.getId()) {
             case R.id.add:
                 if (!TextUtils.isEmpty(dataBinding.edit.getText())) {
-                    dataBinding.textView.setText(dataBinding.edit.getText().toString());
+                    String text = dataBinding.edit.getText().toString();
+                    dataBinding.textView.setText(text);
+                    Log.e("wwh", "TextAnimActivity --> onClick: " + text);
+                    for (int i = 0; i < text.length(); i++) {
+                        Log.e("wwh", "TextAnimActivity --> onClick: " + (int) text.charAt(i));
+
+                    }
                 }
                 break;
         }

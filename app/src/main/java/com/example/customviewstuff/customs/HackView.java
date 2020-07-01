@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import com.example.customviewstuff.Pool;
 import com.example.customviewstuff.Reusable;
@@ -21,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Description: blablabla
  */
 public class HackView extends BaseSurfaceView {
-    private static final long REMAIN_TIME = 600;
+    private long REMAIN_TIME = 600;
     private Random random;
     private Pool<Char> pool;
     private List<Char> list;
@@ -57,7 +58,7 @@ public class HackView extends BaseSurfaceView {
                 aChar.set(random.nextFloat() * (getMeasuredWidth() - textSize), random.nextFloat() * getMeasuredHeight(), 0, maxLevel(), textSize);
                 list.add(aChar);
                 try {
-                    Thread.sleep(30);
+                    Thread.sleep(REMAIN_TIME / 20);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -76,6 +77,12 @@ public class HackView extends BaseSurfaceView {
 
     @Override
     protected void onDataUpdate() {
+        if (onTouch && REMAIN_TIME < 3000) {
+            REMAIN_TIME += 10;
+        }
+        if (!onTouch && REMAIN_TIME > 600) {
+            REMAIN_TIME -= 10;
+        }
         for (Char aChar : list) {
             aChar.move();
         }
@@ -126,7 +133,7 @@ public class HackView extends BaseSurfaceView {
 
         void move() {
             time += UPDATE_RATE;
-            if (next == null && level < maxLevel) {
+            if (next == null && level < maxLevel && time >= REMAIN_TIME / 20) {
                 next = pool.get();
                 next.set(x, y + textSize, level + 1, maxLevel, textSize);
                 list.add(next);
@@ -155,5 +162,21 @@ public class HackView extends BaseSurfaceView {
     private String ramdomC() {
 //        return String.valueOf((char) (random.nextInt(Integer.MAX_VALUE)));
         return String.valueOf((char) (800 + random.nextInt(11100 - 800)));
+    }
+
+    private boolean onTouch;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                onTouch = true;
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                onTouch = false;
+                break;
+        }
+        return true;
     }
 }

@@ -43,18 +43,21 @@ public class DnmButton extends AppCompatTextView {
         animator.setDuration(lcDuration);
         animator.start();
     };
-    private float value, fraction;
+    private float value, scale, fraction;
     private float radius, shadowWidth;
     private int shadowColor;
     private PorterDuffXfermode xfermode;
     private LinearGradient shader;
+
+    private ValueAnimator scaleAnim;
+    private boolean isOut;
 
     public DnmButton(@NonNull Context context) {
         this(context, null);
     }
 
     public DnmButton(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, 16842884);
     }
 
     public DnmButton(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -64,6 +67,7 @@ public class DnmButton extends AppCompatTextView {
 
     private void init(Context context, AttributeSet attrs) {
         radiusArray = new float[8];
+        setClickable(true);
         if (attrs != null) {
             TypedArray arr = context.obtainStyledAttributes(attrs, R.styleable.DnmButton);
             radius = arr.getDimension(R.styleable.DnmButton_radius, 10);
@@ -108,6 +112,14 @@ public class DnmButton extends AppCompatTextView {
             fraction = (float) animation.getAnimatedValue();
             invalidate();
         });
+
+        scaleAnim = new ValueAnimator();
+        scaleAnim.setDuration(200);
+        scaleAnim.addUpdateListener(animation -> {
+            scale = (float) animation.getAnimatedValue();
+            invalidate();
+        });
+        scale = 1;
         setGravity(Gravity.CENTER);
     }
 
@@ -124,7 +136,7 @@ public class DnmButton extends AppCompatTextView {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!isEnabled()) {
-            return true;
+            return super.onTouchEvent(event);
         }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -133,6 +145,7 @@ public class DnmButton extends AppCompatTextView {
                 startX = event.getX();
                 startY = event.getY();
                 inTime = System.currentTimeMillis();
+                zoomOut();
                 postDelayed(lcRun, 80);
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -141,6 +154,7 @@ public class DnmButton extends AppCompatTextView {
                     isLongClick = false;
                     removeCallbacks(lcRun);
                     animator.cancel();
+                    zoomIn();
                     if (value != 0) {
                         value = 0;
                     }
@@ -157,16 +171,36 @@ public class DnmButton extends AppCompatTextView {
                     animator.setDuration((long) (360 - value * 360));
                     animator.start();
                 }
+                zoomIn();
                 break;
             case MotionEvent.ACTION_CANCEL:
                 inTouch = false;
                 isLongClick = false;
                 removeCallbacks(lcRun);
                 animator.cancel();
+                if (scale != 1) {
+                    zoomIn();
+                }
                 break;
         }
         invalidate();
         return true;
+    }
+
+    private void zoomIn() {
+        if (scale != 1 && !isOut) {
+            isOut = true;
+            scaleAnim.cancel();
+            scaleAnim.setFloatValues(scale, 1f);
+            scaleAnim.start();
+        }
+    }
+
+    private void zoomOut() {
+        isOut = false;
+        scaleAnim.cancel();
+        scaleAnim.setFloatValues(scale, 0.9f);
+        scaleAnim.start();
     }
 
     @Override
@@ -180,6 +214,9 @@ public class DnmButton extends AppCompatTextView {
 
     @Override
     public void draw(Canvas canvas) {
+        if (scale != 0) {
+            canvas.scale(scale, scale, getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
+        }
         rectF.set(shadowWidth, shadowWidth, getMeasuredWidth() - shadowWidth, getMeasuredHeight() - shadowWidth);
         drawShadow(canvas);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

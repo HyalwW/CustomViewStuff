@@ -4,51 +4,50 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
 import com.example.customviewstuff.customs.BaseSurfaceView;
 
-/**
- * Created by Wang.Wenhui
- * Date: 2020/6/24
- * Description: blablabla
- */
-public class ImageVisitView extends BaseSurfaceView {
+public class PdfView extends BaseSurfaceView {
     private Bitmap img;
-    private RectF dstRect;
     private float baseScale, scale;
-    private PointF center;
+    private float cx, cy;
 
     private float xInc, yInc, sub;
     private VelocityTracker tracker;
 
-    public ImageVisitView(Context context) {
+    private Matrix matrix;
+    private RectF dstRect;
+
+    public PdfView(Context context) {
         super(context);
     }
 
-    public ImageVisitView(Context context, AttributeSet attrs) {
+    public PdfView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ImageVisitView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public PdfView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @Override
     protected void onInit() {
         dstRect = new RectF();
-        center = new PointF();
         tracker = VelocityTracker.obtain();
+        matrix = new Matrix();
     }
 
     @Override
     protected void onReady() {
+        sub = Math.min(getMeasuredWidth(), getMeasuredHeight()) * 0.001f;
         if (img != null) {
             setBitmap(img, false);
         }
@@ -69,7 +68,7 @@ public class ImageVisitView extends BaseSurfaceView {
                         xInc = 0;
                     }
                 }
-                center.x += xInc;
+                cx += xInc;
             }
             if (yInc != 0) {
                 if (yInc > 0) {
@@ -83,31 +82,21 @@ public class ImageVisitView extends BaseSurfaceView {
                         yInc = 0;
                     }
                 }
-                center.y += yInc;
+                cy += yInc;
             } else {
                 yInc = 0;
             }
-            setRect();
+            setMatrix();
             if (xInc == 0 && yInc == 0) {
                 checkBounds();
             }
         }
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int height = img == null ? 1 : (int) (img.getHeight() * scale);
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), height);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        if (img != null) {
-            center.set(getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
-            sub = Math.min(getMeasuredWidth(), getMeasuredHeight()) * 0.001f;
-            callDraw("");
-        }
+    private void setMatrix() {
+        matrix.reset();
+        matrix.preScale(scale, scale);
+        matrix.postTranslate(cx, cy);
     }
 
     @Override
@@ -118,7 +107,8 @@ public class ImageVisitView extends BaseSurfaceView {
     @Override
     protected void draw(Canvas canvas, Object data) {
         if (img != null && !img.isRecycled()) {
-            canvas.drawBitmap(img, null, dstRect, null);
+            canvas.drawColor(Color.WHITE);
+            canvas.drawBitmap(img, matrix, null);
             if (xInc != 0 || yInc != 0) {
                 callDraw("");
             }
@@ -135,6 +125,15 @@ public class ImageVisitView extends BaseSurfaceView {
         return false;
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int height = img == null ? 1 :(int) (img.getHeight() * scale);
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), height);
+        if (img != null) {
+            callDraw("");
+        }
+    }
+
     public void setBitmap(final int id, final boolean recycle) {
         doInThread(() -> setBitmap(BitmapFactory.decodeResource(getResources(), id), recycle), true);
     }
@@ -148,17 +147,10 @@ public class ImageVisitView extends BaseSurfaceView {
         img = Bitmap.createBitmap(bitmap);
         if (isAlive) {
             scale = baseScale = (float) getMeasuredWidth() / img.getWidth();
-            center.set(getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
+            matrix.reset();
             callDraw("");
-            post(this::requestLayout);
         }
-    }
-
-    public void recycle() {
-        if (img != null && !img.isRecycled()) {
-            img.recycle();
-        }
-        img = null;
+        post(this::requestLayout);
     }
 
     private float d1x, d1y, d2x, d2y;
@@ -181,9 +173,9 @@ public class ImageVisitView extends BaseSurfaceView {
                 if (id == 0) {
                     d1x = event.getX(0);
                     d1y = event.getY(0);
-                    temp.set(center);
+                    temp.set(cx, cy);
                     xInc = yInc = 0;
-                } else if (id == 1 && event.getPointerCount() > 1) {
+                } else if (id == 1) {
                     d2x = event.getX(1);
                     d2y = event.getY(1);
                     blength = distance(d1x, d1y, d2x, d2y);
@@ -198,7 +190,8 @@ public class ImageVisitView extends BaseSurfaceView {
                         parentMove(true);
                     } else {
                         tracker.addMovement(event);
-                        center.set(temp.x + (event.getX(0) - d1x), temp.y + (event.getY(0) - d1y));
+                        cx = temp.x + (event.getX(0) - d1x);
+                        cy = temp.y + (event.getY(0) - d1y);
                         callDraw("");
                     }
                 } else if (event.getPointerCount() > 1) {
@@ -207,14 +200,8 @@ public class ImageVisitView extends BaseSurfaceView {
                     //获取图片缩放增量
                     float scaleIncrement = (nLength - blength) / (Math.min(getMeasuredWidth(), getMeasuredHeight()));
                     scale = tempScale + scaleIncrement;
-                    float vx = (event.getX(0) + event.getX(1)) / 2;
-                    float vy = (event.getY(0) + event.getY(1)) / 2;
-                    //两指中点到bitmap中点连线的角度
-                    double angle = Math.atan2(temp.y - vy, temp.x - vx);
-                    //两指中点到bitmap中点位置距离
-                    float lLength = distance(temp.x, temp.y, vx, vy);
-                    //重新获取新的bitmap中点位置
-                    center.set(temp.x + ((float) (Math.cos(angle) * scaleIncrement * lLength)), temp.y + (float) (Math.sin(angle) * scaleIncrement * lLength));
+//                    sx = (event.getX(0) + event.getX(1)) / 2;
+//                    sy = (event.getY(0) + event.getY(1)) / 2;
                     callDraw("");
                 }
                 break;
@@ -241,16 +228,19 @@ public class ImageVisitView extends BaseSurfaceView {
     }
 
     private void checkBounds() {
+        dstRect.set(0, 0, img.getWidth(), img.getHeight());
+        matrix.mapRect(dstRect);
         if (dstRect.left < 0 && dstRect.right < getMeasuredWidth()) {
-            center.x += Math.min(-dstRect.left, getMeasuredWidth() - dstRect.right);
+            cx += Math.min(-dstRect.left, getMeasuredWidth() - dstRect.right);
         } else if (dstRect.left > 0 && dstRect.right > getMeasuredWidth()) {
-            center.x -= Math.min(dstRect.left, dstRect.right - getMeasuredWidth());
+            cx -= Math.min(dstRect.left, dstRect.right - getMeasuredWidth());
         }
         if (dstRect.top < 0 && dstRect.bottom < getMeasuredHeight()) {
-            center.y += Math.min(-dstRect.top, getMeasuredHeight() - dstRect.bottom);
+            cy += Math.min(-dstRect.top, getMeasuredHeight() - dstRect.bottom);
         } else if (dstRect.top > 0 && dstRect.bottom > getMeasuredHeight()) {
-            center.y -= Math.min(dstRect.top, dstRect.bottom - getMeasuredHeight());
+            cy -= Math.min(dstRect.top, dstRect.bottom - getMeasuredHeight());
         }
+        setMatrix();
     }
 
     private void parentMove(boolean move) {
@@ -261,9 +251,4 @@ public class ImageVisitView extends BaseSurfaceView {
         return (float) Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
-    private void setRect() {
-        float fx = img.getWidth() * scale / 2;
-        float fy = img.getHeight() * scale / 2;
-        dstRect.set(center.x - fx, center.y - fy, center.x + fx, center.y + fy);
-    }
 }

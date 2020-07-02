@@ -8,12 +8,12 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <com.example.customviewstuff.bitmapViewer.ImageVisitView
             android:id="@+id/image"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toTopOf="@id/divide"
             app:layout_constraintTop_toTopOf="parent" />
 

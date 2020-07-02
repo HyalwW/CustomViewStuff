@@ -1,7 +1,6 @@
 package com.example.customviewstuff.bitmapViewer;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.pdf.PdfRenderer;
 import android.os.Build;
@@ -12,7 +11,6 @@ import android.util.LruCache;
 import android.view.View;
 
 import com.example.customviewstuff.AbsViewHolder;
-import com.example.customviewstuff.R;
 import com.example.customviewstuff.ThreadPool;
 import com.example.customviewstuff.databinding.ItemBitmapBinding;
 
@@ -26,10 +24,13 @@ import java.util.Locale;
  */
 public class MyViewHolder extends AbsViewHolder<Bitmap, ItemBitmapBinding> {
     private LruCache<String, Bitmap> cache;
+    private File file;
+    private int position;
 
-    public MyViewHolder(@NonNull View itemView, LruCache<String, Bitmap> cache) {
+    public MyViewHolder(@NonNull View itemView, LruCache<String, Bitmap> cache, String fileName) {
         super(itemView);
         this.cache = cache;
+        file = new File(fileName);
     }
 
     @Override
@@ -39,19 +40,17 @@ public class MyViewHolder extends AbsViewHolder<Bitmap, ItemBitmapBinding> {
 
     @Override
     public void bind(Bitmap item, int position, int size) {
-        if (BitmapViewActivity.needCache) {
-            ThreadPool.cache().execute(() -> {
-                Bitmap bitmap = cache.get("position" + position);
-                if (bitmap == null || bitmap.isRecycled()) {
-                    bitmap = getBitmap(new File(BitmapViewActivity.fileName), position);
-//                    bitmap = BitmapFactory.decodeResource(dataBinding.getRoot().getResources(), R.drawable.gm);
-                    cache.put("position" + position, bitmap);
-                }
+        this.position = position;
+        ThreadPool.cache().execute(() -> {
+            Bitmap bitmap = cache.get("position" + position);
+            if (bitmap == null || bitmap.isRecycled()) {
+                bitmap = getBitmap(file, position);
+                cache.put("position" + position, bitmap);
+            }
+            if (position == this.position) {
                 dataBinding.image.setBitmap(bitmap, false);
-            });
-        } else {
-            dataBinding.image.setBitmap(R.drawable.gm, true);
-        }
+            }
+        });
         dataBinding.serial.setText(String.format(Locale.CHINA, "%d/%d", position + 1, size));
     }
 
@@ -61,8 +60,11 @@ public class MyViewHolder extends AbsViewHolder<Bitmap, ItemBitmapBinding> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 PdfRenderer renderer = new PdfRenderer(ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_READ_ONLY));
                 PdfRenderer.Page page = renderer.openPage(p);
-                int width = dataBinding.getRoot().getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
-                int height = dataBinding.getRoot().getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
+//                int width = dataBinding.getRoot().getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
+//                int height = dataBinding.getRoot().getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
+                int dpi = dataBinding.getRoot().getResources().getDisplayMetrics().densityDpi;
+                int width = 3 * page.getWidth();
+                int height = 3 * page.getHeight();
                 bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 Rect r = new Rect(0, 0, width, height);
                 page.render(bitmap, r, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);

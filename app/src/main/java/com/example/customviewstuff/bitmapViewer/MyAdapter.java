@@ -20,9 +20,11 @@ import java.util.List;
  */
 public class MyAdapter extends AbsAdapter<Bitmap> {
     private LruCache<String, Bitmap> cache;
+    private String fileName;
 
-    public MyAdapter(Context context, List<Bitmap> list) {
+    public MyAdapter(Context context, List<Bitmap> list, String fileName) {
         super(context, list);
+        this.fileName = fileName;
         int max = (int) Runtime.getRuntime().maxMemory() / 2;
         cache = new LruCache<String, Bitmap>(max) {
             @Override
@@ -40,6 +42,6 @@ public class MyAdapter extends AbsAdapter<Bitmap> {
 
     @Override
     protected AbsViewHolder<Bitmap, ?> viewHolder(LayoutInflater inflater, ViewGroup parent, int type) {
-        return new MyViewHolder(inflater.inflate(R.layout.item_bitmap, parent, false), cache);
+        return new MyViewHolder(inflater.inflate(R.layout.item_bitmap, parent, false), cache, fileName);
     }
 }

@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BitmapViewActivity extends BaseActivity<ActivityBitmapViewBinding> {
-    public static boolean needCache;
-    public static String fileName;
 
     @Override
     protected int layoutId() {
@@ -54,8 +52,7 @@ public class BitmapViewActivity extends BaseActivity<ActivityBitmapViewBinding> 
                     dataBinding.getRoot().post(() -> new AlertDialog.Builder(this)
                             .setTitle("选择文件")
                             .setItems(strings, (dialog, which) -> {
-                                needCache = true;
-                                fileName = strings[which];
+                                String fileName = strings[which];
                                 try {
                                     List<Bitmap> ll = new ArrayList<>();
                                     PdfRenderer renderer = new PdfRenderer(ParcelFileDescriptor.open(new File(fileName), ParcelFileDescriptor.MODE_READ_ONLY));
@@ -64,7 +61,7 @@ public class BitmapViewActivity extends BaseActivity<ActivityBitmapViewBinding> 
                                     for (int i = 0; i < pageCount; i++) {
                                         ll.add(null);
                                     }
-                                    MyAdapter adapter = new MyAdapter(this, ll);
+                                    MyAdapter adapter = new MyAdapter(this, ll, fileName);
                                     dataBinding.listView.setAdapter(adapter);
                                     dataBinding.listView.setLayoutManager(new LinearLayoutManager(this));
                                 } catch (IOException e) {

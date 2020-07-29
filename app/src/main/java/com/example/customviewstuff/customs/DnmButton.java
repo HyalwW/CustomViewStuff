@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 
@@ -178,9 +179,7 @@ public class DnmButton extends AppCompatTextView {
                 isLongClick = false;
                 removeCallbacks(lcRun);
                 animator.cancel();
-                if (scale != 1) {
-                    zoomIn();
-                }
+                zoomIn();
                 break;
         }
         invalidate();
@@ -198,6 +197,7 @@ public class DnmButton extends AppCompatTextView {
 
     private void zoomOut() {
         isOut = false;
+        scale = 0.999999f;
         scaleAnim.cancel();
         scaleAnim.setFloatValues(scale, 0.9f);
         scaleAnim.start();

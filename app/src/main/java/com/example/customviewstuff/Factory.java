@@ -3,6 +3,7 @@ package com.example.customviewstuff;
 import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.BobbleActivity;
 import com.example.customviewstuff.activities.CartActivity;
+import com.example.customviewstuff.activities.ChessActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.EyeActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;
@@ -11,6 +12,7 @@ import com.example.customviewstuff.activities.FrameActivity;
 import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.HelixActivity;
 import com.example.customviewstuff.activities.HexaActivity;
+import com.example.customviewstuff.activities.IllusionActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
 import com.example.customviewstuff.activities.JumpTextActivity;
 import com.example.customviewstuff.activities.LightingActivity;
@@ -82,6 +84,8 @@ public class Factory {
     private static final String CHAT = "聊天室";
     private static final String BOBBLE = "泡泡龙";
     private static final String IMAGE_VIEW = "PDF查看器";
+    private static final String ILLUSION = "幻觉线条";
+    private static final String CHESS = "五子棋";
 
     static {
         caches = new HashMap<>();
@@ -122,6 +126,8 @@ public class Factory {
         caches.put(CHAT, ChatRoomActivity.class);
         caches.put(BOBBLE, BobbleActivity.class);
         caches.put(IMAGE_VIEW, BitmapViewActivity.class);
+        caches.put(ILLUSION, IllusionActivity.class);
+        caches.put(CHESS, ChessActivity.class);
     }
 
     public static Class create(String s) {

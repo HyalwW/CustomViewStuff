@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -118,6 +119,7 @@ public class ImageVisitView extends BaseSurfaceView {
     @Override
     protected void draw(Canvas canvas, Object data) {
         if (img != null && !img.isRecycled()) {
+            canvas.drawColor(Color.WHITE);
             canvas.drawBitmap(img, null, dstRect, null);
             if (xInc != 0 || yInc != 0) {
                 callDraw("");

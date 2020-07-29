@@ -19,7 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/MyTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".bitmapViewer.BitmapViewActivity"></activity>
+        <activity android:name=".activities.ChessActivity"></activity>
+        <activity android:name=".activities.IllusionActivity" />
+        <activity android:name=".bitmapViewer.BitmapViewActivity" />
         <activity android:name=".activities.BobbleActivity" />
         <activity android:name=".avChat.ChatRoomActivity" />
         <activity android:name=".activities.StackActivity" />

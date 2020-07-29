@@ -318,7 +318,7 @@ public class ChessView extends BaseSurfaceView {
             y -= gapWidth;
             Piece exist = exist(x, y, piece.isBlack);
             if (exist != null) {
-                checkList.add(piece);
+                checkList.add(exist);
             } else {
                 break;
             }

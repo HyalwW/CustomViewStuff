@@ -8,10 +8,16 @@ import android.graphics.Paint;
 import android.graphics.PathEffect;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
+import com.example.customviewstuff.ThreadPool;
 import com.example.customviewstuff.customs.BaseSurfaceView;
+import com.example.customviewstuff.socket.IMessageSender;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +32,8 @@ public class MultiChessView extends BaseSurfaceView {
     private int rowSum = 20, colSum = 15;
     private float gapWidth, radius, boardBottom;
     private List<Piece> pieces, checkList;
-    private RectF boardRect, reserRect;
+    private Piece last;
+    private RectF boardRect, resetRect;
     private PathEffect dash;
     private int[] near;
     private String showText;
@@ -35,6 +42,9 @@ public class MultiChessView extends BaseSurfaceView {
     //0:没有输赢 1：黑棋 2：白棋
     private int winner, nowPlayer, me;
     private String ipName;
+    private IMessageSender sender;
+    private Gson gson;
+    private TransformBean bean;
 
     public MultiChessView(Context context) {
         super(context);
@@ -51,12 +61,14 @@ public class MultiChessView extends BaseSurfaceView {
     @Override
     protected void onInit() {
         boardRect = new RectF();
-        reserRect = new RectF();
+        resetRect = new RectF();
         pieces = new CopyOnWriteArrayList<>();
         checkList = new LinkedList<>();
         dash = new DashPathEffect(new float[]{10, 10}, 5);
         near = new int[2];
         showText = "";
+        gson = new Gson();
+        bean = new TransformBean();
     }
 
     @Override
@@ -67,8 +79,9 @@ public class MultiChessView extends BaseSurfaceView {
         radius = gapWidth * 0.4f;
         boardBottom = gapWidth * rowSum;
         boardRect.set(0, 0, w, boardBottom);
-        reserRect.set(w * 0.05f, boardBottom + h * 0.01f, w * 0.25f, boardBottom + h * 0.01f + w * 0.1f);
+        resetRect.set(w * 0.05f, boardBottom + h * 0.01f, w * 0.25f, boardBottom + h * 0.01f + w * 0.1f);
         mPaint.setTextAlign(Paint.Align.CENTER);
+        startAnim();
     }
 
     @Override
@@ -86,6 +99,9 @@ public class MultiChessView extends BaseSurfaceView {
         drawText(canvas);
         if (isHost) {
             drawReset(canvas);
+            if (!isConnect) {
+                drawIp(canvas);
+            }
         }
     }
 
@@ -120,29 +136,44 @@ public class MultiChessView extends BaseSurfaceView {
 
     private void drawPieces(Canvas canvas) {
         for (Piece piece : pieces) {
-            piece.draw(canvas);
+            mPaint.setColor(piece.isWin ? Color.GREEN : (piece.owner == 1 ? Color.BLACK : Color.WHITE));
+            float cx = piece.col * gapWidth;
+            float cy = piece.row * gapWidth;
+            canvas.drawCircle(cx, cy, radius, mPaint);
+            if (piece.equals(last)) {
+                mPaint.setStyle(Paint.Style.STROKE);
+                mPaint.setColor(Color.BLUE);
+                canvas.drawRect(cx - radius, cy - radius, cx + radius, cy + radius, mPaint);
+                mPaint.setStyle(Paint.Style.FILL);
+            }
         }
     }
 
     private void drawShadow(Canvas canvas) {
         if (inTouch) {
             mPaint.setColor(canDrop ? (nowPlayer == 1 ? 0x88000000 : 0x88FFFFFF) : 0xBBFF0000);
-            canvas.drawCircle(near[0], near[1], radius, mPaint);
+            canvas.drawCircle(near[0] * gapWidth, near[1] * gapWidth, radius, mPaint);
         }
     }
 
     private void drawText(Canvas canvas) {
         mPaint.setColor(Color.BLACK);
-        mPaint.setTextSize(getMeasuredWidth() * 0.1f);
+        mPaint.setTextSize(getMeasuredWidth() * 0.07f);
         canvas.drawText(showText, getMeasuredWidth() >> 1, (getMeasuredHeight() + boardBottom + mPaint.getTextSize()) / 2, mPaint);
     }
 
     private void drawReset(Canvas canvas) {
         mPaint.setColor(isReset ? 0xFF00FFFF : 0x5500FFFF);
-        canvas.drawRect(reserRect, mPaint);
+        canvas.drawRect(resetRect, mPaint);
         mPaint.setColor(Color.BLACK);
-        mPaint.setTextSize((reserRect.right - reserRect.left) / 3.2f);
-        canvas.drawText("重来", (reserRect.left + reserRect.right) / 2, (reserRect.top + reserRect.bottom + mPaint.getTextSize() * 0.8f) / 2, mPaint);
+        mPaint.setTextSize((resetRect.right - resetRect.left) / 3.2f);
+        canvas.drawText("下一局", (resetRect.left + resetRect.right) / 2, (resetRect.top + resetRect.bottom + mPaint.getTextSize() * 0.8f) / 2, mPaint);
+    }
+
+    private void drawIp(Canvas canvas) {
+        mPaint.setColor(Color.RED);
+        mPaint.setTextSize(getMeasuredWidth() * 0.05f);
+        canvas.drawText(ipName, getMeasuredWidth() >> 1, getMeasuredHeight(), mPaint);
     }
 
     @Override
@@ -164,9 +195,6 @@ public class MultiChessView extends BaseSurfaceView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!isConnect) {
-            return false;
-        }
         float eventX = event.getX();
         float eventY = event.getY();
         switch (event.getAction()) {
@@ -174,7 +202,7 @@ public class MultiChessView extends BaseSurfaceView {
                 if (inTouch = eventY < boardBottom) {
                     calNearPos(eventX, eventY);
                 }
-                if (reserRect.contains(eventX, eventY) && isHost) {
+                if (resetRect.contains(eventX, eventY) && isHost) {
                     isReset = true;
                 }
                 break;
@@ -182,7 +210,7 @@ public class MultiChessView extends BaseSurfaceView {
                 if (inTouch = eventY < boardBottom) {
                     calNearPos(eventX, eventY);
                 }
-                if (!reserRect.contains(eventX, eventY)) {
+                if (!resetRect.contains(eventX, eventY)) {
                     isReset = false;
                 }
                 break;
@@ -190,10 +218,11 @@ public class MultiChessView extends BaseSurfaceView {
                 if (inTouch) {
                     inTouch = false;
                     if (canDrop) {
+                        Piece piece = new Piece(near[0], near[1], nowPlayer);
                         if (isHost) {
-                            addAndCheckWin(new Piece(near[0], near[1], nowPlayer));
+                            addAndCheckWin(piece);
                         } else {
-
+                            send(createClientBean(piece));
                         }
                     }
                 }
@@ -202,24 +231,50 @@ public class MultiChessView extends BaseSurfaceView {
                     isReset = false;
                     win = false;
                     pieces.clear();
+                    send(createHostBean());
                 }
                 break;
         }
         return true;
     }
 
+    private String createClientBean(Piece piece) {
+        bean.setCheckList(null);
+        bean.setPieces(null);
+        bean.setFromHost(isHost);
+        bean.setPiece(piece);
+        bean.setPlayer(me);
+        bean.setWin(false);
+        return gson.toJson(bean);
+    }
+
     private void addAndCheckWin(Piece piece) {
         pieces.add(piece);
+        last = piece;
         win = checkWin(piece);
         if (win) {
             for (Piece p : checkList) {
                 p.win();
             }
             winner = nowPlayer;
+            showText = winner == me ? "你赢啦~" : "你输啦！";
             nowPlayer = nowPlayer == 1 ? 2 : 1;
         } else {
             nowPlayer = nowPlayer == 1 ? 2 : 1;
+            showText = "轮到" + (nowPlayer == me ? "你" : "对面") + "下了" + (nowPlayer == 1 ? "(黑棋)" : "(白棋)");
         }
+        send(createHostBean());
+    }
+
+    private String createHostBean() {
+        bean.setPieces(pieces);
+        bean.setCheckList(checkList);
+        bean.setLast(last);
+        bean.setWin(win);
+        bean.setWinner(winner);
+        bean.setPlayer(nowPlayer);
+        bean.setFromHost(isHost);
+        return gson.toJson(bean);
     }
 
     private boolean checkWin(Piece piece) {
@@ -397,7 +452,7 @@ public class MultiChessView extends BaseSurfaceView {
                 }
             }
         }
-        if (win || me != nowPlayer) {
+        if (win || me != nowPlayer || !isConnect) {
             canDrop = false;
         } else {
             canDrop = true;
@@ -413,8 +468,46 @@ public class MultiChessView extends BaseSurfaceView {
         this.isHost = isHost;
         this.ipName = ipName;
         me = isHost ? 1 : 2;
-        nowPlayer = Math.random() > 0.5 ? 1 : 2;
-        startAnim();
+        if (isHost) {
+            nowPlayer = Math.random() > 0.5 ? 1 : 2;
+        }
+        showText = isHost ? "等待玩家加入" : "正在加入" + ipName;
+        callDraw("");
+    }
+
+    public void connect(boolean connect) {
+        isConnect = connect;
+        if (connect) {
+            if (isHost) {
+                showText = "轮到" + (nowPlayer == me ? "你" : "对面") + "下了" + (nowPlayer == 1 ? "(黑棋)" : "(白棋)");
+                ThreadPool.cache().execute(() -> {
+                    sleep(100);
+                    send(createHostBean());
+                });
+            }
+        } else {
+            showText = isHost ? "等待玩家加入" : "正在加入" + ipName;
+        }
+    }
+
+    public void receive(String msg) {
+        TransformBean tb = gson.fromJson(msg, new TypeToken<TransformBean>() {
+        }.getType());
+        if (tb.isFromHost()) {
+            nowPlayer = tb.getPlayer();
+            pieces.clear();
+            pieces.addAll(tb.getPieces());
+            last = tb.getLast();
+            win = tb.isWin();
+            winner = tb.getWinner();
+            if (win) {
+                showText = winner == me ? "你赢啦~" : "你输啦！";
+            } else {
+                showText = "轮到" + (nowPlayer == me ? "你" : "对面") + "下了" + (nowPlayer == 1 ? "(黑棋)" : "(白棋)");
+            }
+        } else {
+            addAndCheckWin(tb.getPiece());
+        }
     }
 
     public class Piece {
@@ -431,9 +524,23 @@ public class MultiChessView extends BaseSurfaceView {
             isWin = true;
         }
 
-        void draw(Canvas canvas) {
-            mPaint.setColor(isWin ? Color.GREEN : (owner == 1 ? Color.BLACK : Color.WHITE));
-            canvas.drawCircle(col * gapWidth, row * gapWidth, radius, mPaint);
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (!(obj instanceof Piece)) {
+                return false;
+            }
+            Piece other = (Piece) obj;
+            return row == other.row && col == other.col && owner == other.owner;
         }
+    }
+
+    public void send(String msg) {
+        if (sender != null) {
+            sender.send(msg);
+        }
+    }
+
+    public void setSender(IMessageSender sender) {
+        this.sender = sender;
     }
 }

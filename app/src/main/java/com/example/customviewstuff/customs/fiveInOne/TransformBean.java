@@ -9,7 +9,11 @@ import java.util.List;
  */
 public class TransformBean {
     private int player;
+    private int winner;
     private boolean isWin;
+    private boolean fromHost;
+    private MultiChessView.Piece piece;
+    private MultiChessView.Piece last;
     private List<MultiChessView.Piece> pieces;
     private List<MultiChessView.Piece> checkList;
 
@@ -21,12 +25,44 @@ public class TransformBean {
         this.player = player;
     }
 
+    public int getWinner() {
+        return winner;
+    }
+
+    public void setWinner(int winner) {
+        this.winner = winner;
+    }
+
     public boolean isWin() {
         return isWin;
     }
 
     public void setWin(boolean win) {
         isWin = win;
+    }
+
+    public boolean isFromHost() {
+        return fromHost;
+    }
+
+    public void setFromHost(boolean fromHost) {
+        this.fromHost = fromHost;
+    }
+
+    public MultiChessView.Piece getPiece() {
+        return piece;
+    }
+
+    public void setPiece(MultiChessView.Piece piece) {
+        this.piece = piece;
+    }
+
+    public MultiChessView.Piece getLast() {
+        return last;
+    }
+
+    public void setLast(MultiChessView.Piece last) {
+        this.last = last;
     }
 
     public List<MultiChessView.Piece> getPieces() {

@@ -222,6 +222,7 @@ public class MultiChessView extends BaseSurfaceView {
                             addAndCheckWin(piece);
                         } else {
                             send(createClientBean(piece));
+                            nowPlayer = nowPlayer == 1 ? 2 : 1;
                         }
                     }
                 }
@@ -248,6 +249,10 @@ public class MultiChessView extends BaseSurfaceView {
     }
 
     private void addAndCheckWin(Piece piece) {
+        if (exist(piece.col, piece.row, piece.owner) != null) {
+            send(createHostBean());
+            return;
+        }
         pieces.add(piece);
         last = piece;
         win = checkWin(piece);

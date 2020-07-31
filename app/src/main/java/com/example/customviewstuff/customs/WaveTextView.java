@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class WaveTextView extends BaseSurfaceView {
     private List<Text> texts;
-    private static final int textInLine = 30;
+    private static final int textInLine = 16;
     private PointF breakPoint;
     private float range, maxRange, increment;
     private boolean spreading, draw;
@@ -70,8 +70,8 @@ public class WaveTextView extends BaseSurfaceView {
     @Override
     protected void onReady() {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 14; i++) {
-            builder.append("测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试");
+        for (int i = 0; i < 20; i++) {
+            builder.append("测试测试测试测试测试测试测试测试");
         }
         setText(builder.toString());
         increment = getMeasuredWidth() * 0.01f;

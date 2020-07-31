@@ -4,6 +4,7 @@ import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.BobbleActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.ChessActivity;
+import com.example.customviewstuff.activities.ChessMultilActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.EyeActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;
@@ -85,7 +86,8 @@ public class Factory {
     private static final String BOBBLE = "泡泡龙";
     private static final String IMAGE_VIEW = "PDF查看器";
     private static final String ILLUSION = "幻觉线条";
-    private static final String CHESS = "五子棋";
+    private static final String CHESS = "五子棋（单人）";
+    private static final String CHESS_MULTI = "五子棋（联机）";
 
     static {
         caches = new HashMap<>();
@@ -128,6 +130,7 @@ public class Factory {
         caches.put(IMAGE_VIEW, BitmapViewActivity.class);
         caches.put(ILLUSION, IllusionActivity.class);
         caches.put(CHESS, ChessActivity.class);
+        caches.put(CHESS_MULTI, ChessMultilActivity.class);
     }
 
     public static Class create(String s) {

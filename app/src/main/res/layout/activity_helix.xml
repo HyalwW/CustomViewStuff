@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -11,8 +12,42 @@
         android:layout_height="match_parent"
         tools:context=".activities.HelixActivity">
 
-        <com.example.customviewstuff.customs.HackView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <!--<com.example.customviewstuff.customs.HackView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent" />-->
+
+        <com.example.customviewstuff.customs.fiveInOne.ChessView
+            android:id="@+id/tl"
+            android:layout_width="160dp"
+            android:layout_height="320dp"
+            app:layout_constraintBottom_toTopOf="@id/bl"
+            app:layout_constraintEnd_toStartOf="@id/tr"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.example.customviewstuff.customs.fiveInOne.ChessView
+            android:id="@+id/tr"
+            android:layout_width="160dp"
+            android:layout_height="320dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tl"
+            app:layout_constraintTop_toTopOf="@id/tl" />
+
+        <com.example.customviewstuff.customs.fiveInOne.ChessView
+            android:id="@+id/bl"
+            android:layout_width="160dp"
+            android:layout_height="320dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tr"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tl" />
+
+        <com.example.customviewstuff.customs.fiveInOne.ChessView
+            android:id="@+id/br"
+            android:layout_width="160dp"
+            android:layout_height="320dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tl"
+            app:layout_constraintTop_toTopOf="@id/bl" />
     </android.support.constraint.ConstraintLayout>
 </layout>

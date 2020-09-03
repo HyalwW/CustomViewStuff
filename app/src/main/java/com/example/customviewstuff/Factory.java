@@ -14,6 +14,7 @@ import com.example.customviewstuff.activities.HeartActivity;
 import com.example.customviewstuff.activities.HelixActivity;
 import com.example.customviewstuff.activities.HexaActivity;
 import com.example.customviewstuff.activities.IllusionActivity;
+import com.example.customviewstuff.activities.ImageVerifyActivity;
 import com.example.customviewstuff.activities.JumpBeanActivity;
 import com.example.customviewstuff.activities.JumpTextActivity;
 import com.example.customviewstuff.activities.LightingActivity;
@@ -88,6 +89,7 @@ public class Factory {
     private static final String ILLUSION = "幻觉线条";
     private static final String CHESS = "五子棋（单人）";
     private static final String CHESS_MULTI = "五子棋（联机）";
+    private static final String IMAGE_VERIFY = "图片滑块验证";
 
     static {
         caches = new HashMap<>();
@@ -131,6 +133,7 @@ public class Factory {
         caches.put(ILLUSION, IllusionActivity.class);
         caches.put(CHESS, ChessActivity.class);
         caches.put(CHESS_MULTI, ChessMultilActivity.class);
+        caches.put(IMAGE_VERIFY, ImageVerifyActivity.class);
     }
 
     public static Class create(String s) {

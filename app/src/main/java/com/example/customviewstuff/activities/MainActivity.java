@@ -22,6 +22,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     private static final String[] BASIC_PERMISSIONS = new String[]{Manifest.permission.INTERNET,
             Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
 
+    private static final Boolean debug = false;
+
     @Override
     protected int layoutId() {
         return R.layout.activity_main;
@@ -48,6 +50,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                 ActivityCompat.requestPermissions(this, BASIC_PERMISSIONS, 111);
                 break;
             }
+        }
+        if (debug) {
+            go(this, Factory.create(Factory.IMAGE_VERIFY));
         }
 
     }

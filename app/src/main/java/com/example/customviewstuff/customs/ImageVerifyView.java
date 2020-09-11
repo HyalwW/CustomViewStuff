@@ -1,6 +1,7 @@
 package com.example.customviewstuff.customs;
 
 import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 
 import com.example.customviewstuff.R;
 
@@ -24,7 +26,7 @@ import java.util.Locale;
  * Description: 滑块验证控件
  */
 public class ImageVerifyView extends BaseSurfaceView {
-    private Animator animator;
+    private ValueAnimator backAnim;
     private Bitmap bitmap;
     private float offset, targetOffset, targetHeight;
     private RectF bgRect, scrollRect, imgRect, shadowRect, pieceRect;
@@ -54,6 +56,11 @@ public class ImageVerifyView extends BaseSurfaceView {
         pieceRect = new RectF();
         shadowRect = new RectF();
         mode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
+        backAnim = new ValueAnimator();
+        backAnim.addUpdateListener(animation -> {
+            offset = (float) animation.getAnimatedValue();
+            callDraw("");
+        });
     }
 
     @Override
@@ -171,6 +178,9 @@ public class ImageVerifyView extends BaseSurfaceView {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (scrollRect.contains(eventX, eventY)) {
+                    if (backAnim.isRunning()) {
+                        backAnim.cancel();
+                    }
                     canScroll = true;
                     startTime = System.currentTimeMillis();
                     downX = eventX;
@@ -189,8 +199,8 @@ public class ImageVerifyView extends BaseSurfaceView {
                 if (canScroll) {
                     if (!verify()) {
                         canScroll = false;
-                        offset = 0;
                         startTime = 0;
+                        goBack();
                     }
                     callDraw("");
                 }
@@ -204,5 +214,20 @@ public class ImageVerifyView extends BaseSurfaceView {
         success = Math.abs(targetOffset - offset) < width * 0.02;
         if (success) offset = targetOffset;
         return success;
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        super.surfaceDestroyed(holder);
+        if (backAnim.isRunning()) {
+            backAnim.cancel();
+        }
+    }
+
+    private void goBack() {
+        backAnim.cancel();
+        backAnim.setDuration(200);
+        backAnim.setFloatValues(offset, 0);
+        backAnim.start();
     }
 }

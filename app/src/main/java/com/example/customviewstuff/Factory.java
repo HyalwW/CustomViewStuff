@@ -24,6 +24,7 @@ import com.example.customviewstuff.activities.RadarActivity;
 import com.example.customviewstuff.activities.RippleActivity;
 import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.SnakeActivity;
+import com.example.customviewstuff.activities.SnowActivity;
 import com.example.customviewstuff.activities.StackActivity;
 import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.StayAwayActivity;
@@ -90,6 +91,7 @@ public class Factory {
     public static final String CHESS = "五子棋（单人）";
     public static final String CHESS_MULTI = "五子棋（联机）";
     public static final String IMAGE_VERIFY = "图片滑块验证";
+    public static final String SNOW = "雪花飘飘";
 
     static {
         caches = new HashMap<>();
@@ -134,6 +136,7 @@ public class Factory {
         caches.put(CHESS, ChessActivity.class);
         caches.put(CHESS_MULTI, ChessMultiActivity.class);
         caches.put(IMAGE_VERIFY, ImageVerifyActivity.class);
+        caches.put(SNOW, SnowActivity.class);
     }
 
     public static Class create(String s) {

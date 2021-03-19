@@ -98,9 +98,9 @@ public class MultiChessView extends BaseSurfaceView {
         drawText(canvas);
         if (isHost) {
             drawReset(canvas);
-            if (!isConnect) {
-                drawIp(canvas);
-            }
+//            if (!isConnect) {
+//                drawIp(canvas);
+//            }
         }
     }
 

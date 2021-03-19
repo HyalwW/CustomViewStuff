@@ -4,7 +4,7 @@ import com.example.customviewstuff.activities.ArrowActivity;
 import com.example.customviewstuff.activities.BobbleActivity;
 import com.example.customviewstuff.activities.CartActivity;
 import com.example.customviewstuff.activities.ChessActivity;
-import com.example.customviewstuff.activities.ChessMultilActivity;
+import com.example.customviewstuff.activities.ChessMultiActivity;
 import com.example.customviewstuff.activities.EventDispatchActivity;
 import com.example.customviewstuff.activities.EyeActivity;
 import com.example.customviewstuff.activities.FadeAwayActivity;
@@ -132,7 +132,7 @@ public class Factory {
         caches.put(IMAGE_VIEW, BitmapViewActivity.class);
         caches.put(ILLUSION, IllusionActivity.class);
         caches.put(CHESS, ChessActivity.class);
-        caches.put(CHESS_MULTI, ChessMultilActivity.class);
+        caches.put(CHESS_MULTI, ChessMultiActivity.class);
         caches.put(IMAGE_VERIFY, ImageVerifyActivity.class);
     }
 

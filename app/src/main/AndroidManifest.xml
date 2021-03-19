@@ -21,7 +21,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".activities.ImageVerifyActivity"></activity>
         <activity android:name=".activities.ChessActivity" />
-        <activity android:name=".activities.ChessMultilActivity" />
+        <activity android:name=".activities.ChessMultiActivity" />
         <activity android:name=".activities.IllusionActivity" />
         <activity android:name=".bitmapViewer.BitmapViewActivity" />
         <activity android:name=".activities.BobbleActivity" />

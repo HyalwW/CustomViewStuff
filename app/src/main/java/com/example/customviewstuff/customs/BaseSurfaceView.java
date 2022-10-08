@@ -333,7 +333,7 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
      *
      * @param canvas 画布
      */
-    protected abstract void onRefresh(Canvas canvas);
+    protected void onRefresh(Canvas canvas) {}
 
     /**
      * 调用callDraw后触发，根据特定data绘制
@@ -341,7 +341,7 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
      * @param canvas 画布
      * @param data   数据
      */
-    protected abstract void draw(Canvas canvas, Object data);
+    protected void draw(Canvas canvas, Object data) {}
 
     /**
      * 局部刷新
@@ -350,12 +350,14 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
      * @param data   数据
      * @param rect   画布大小
      */
-    protected abstract void onDrawRect(Canvas canvas, Object data, Rect rect);
+    protected void onDrawRect(Canvas canvas, Object data, Rect rect) {}
 
     /**
      * 是否阻止刷新时清空画布
      *
      * @return
      */
-    protected abstract boolean preventClear();
+    protected boolean preventClear() {
+        return false;
+    }
 }

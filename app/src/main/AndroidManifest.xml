@@ -3,77 +3,78 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.VIBRATE" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.CAMERA" />
 
-    <application
-      android:name=".MyApplication"
-      android:allowBackup="true"
-      android:icon="@drawable/tree"
-      android:label="@string/app_name"
-      android:roundIcon="@mipmap/ic_launcher_round"
-      android:supportsRtl="true"
-      android:theme="@style/MyTheme"
-      tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.SnowActivity"></activity>
-        <activity android:name=".activities.ImageVerifyActivity" />
-        <activity android:name=".activities.ChessActivity" />
-        <activity android:name=".activities.ChessMultiActivity" />
-        <activity android:name=".activities.IllusionActivity" />
-        <activity android:name=".bitmapViewer.BitmapViewActivity" />
-        <activity android:name=".activities.BobbleActivity" />
-        <activity android:name=".avChat.ChatRoomActivity" />
-        <activity android:name=".activities.StackActivity" />
-        <activity android:name=".activities.ToastActivity" />
-        <activity android:name=".activities.RadarActivity" />
-        <activity android:name=".activities.EyeActivity" />
-        <activity android:name=".activities.FireActivity" />
-        <activity android:name=".activities.MultiTouchActivity" />
-        <activity android:name=".activities.StereoActivity" />
-        <activity android:name=".activities.HelixActivity" />
-        <activity android:name=".activities.FadeAwayActivity" />
-        <activity android:name=".customs.soccerGame.SoccerActivity" />
-        <activity android:name=".activities.WaveActivity" />
-        <activity android:name=".activities.WaveTextActivity" />
-        <activity android:name=".activities.JumpTextActivity" />
-        <activity
-          android:name=".activities.EventDispatchActivity"
-          android:screenOrientation="portrait" />
-        <activity
-          android:name=".activities.TreeGrowActivity"
-          android:screenOrientation="landscape" />
-        <activity
-          android:name=".activities.TreeActivity"
-          android:screenOrientation="portrait" />
-        <activity android:name=".activities.FrameActivity" />
-        <activity android:name=".activities.StayAwayActivity" />
-        <activity android:name=".activities.StaringActivity" />
-        <activity android:name=".activities.SnakeActivity" />
-        <activity android:name=".activities.HexaActivity" />
-        <activity android:name=".activities.LightingActivity" />
-        <activity android:name=".activities.TextAnimActivity" />
-        <activity android:name=".activities.TimeActivity" />
-        <activity android:name=".activities.PTTActivity" />
-        <activity android:name=".activities.WebActivity" />
-        <activity android:name=".activities.VideoActivity" />
-        <activity android:name=".activities.JumpBeanActivity" />
-        <activity android:name=".activities.TriAngleActivity" />
-        <activity android:name=".activities.SAEActivity" />
-        <activity android:name=".activities.CartActivity" />
-        <activity android:name=".activities.RippleActivity" />
-        <activity android:name=".activities.ArrowActivity" />
-        <activity android:name=".activities.HeartActivity" />
-        <activity android:name=".activities.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+  <application
+    android:name=".MyApplication"
+    android:allowBackup="true"
+    android:icon="@drawable/tree"
+    android:label="@string/app_name"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/MyTheme"
+    tools:ignore="GoogleAppIndexingWarning">
+    <activity android:name=".activities.StarWarActivity" />
+    <activity android:name=".activities.SnowActivity" />
+    <activity android:name=".activities.ImageVerifyActivity" />
+    <activity android:name=".activities.ChessActivity" />
+    <activity android:name=".activities.ChessMultiActivity" />
+    <activity android:name=".activities.IllusionActivity" />
+    <activity android:name=".bitmapViewer.BitmapViewActivity" />
+    <activity android:name=".activities.BobbleActivity" />
+    <activity android:name=".avChat.ChatRoomActivity" />
+    <activity android:name=".activities.StackActivity" />
+    <activity android:name=".activities.ToastActivity" />
+    <activity android:name=".activities.RadarActivity" />
+    <activity android:name=".activities.EyeActivity" />
+    <activity android:name=".activities.FireActivity" />
+    <activity android:name=".activities.MultiTouchActivity" />
+    <activity android:name=".activities.StereoActivity" />
+    <activity android:name=".activities.HelixActivity" />
+    <activity android:name=".activities.FadeAwayActivity" />
+    <activity android:name=".customs.soccerGame.SoccerActivity" />
+    <activity android:name=".activities.WaveActivity" />
+    <activity android:name=".activities.WaveTextActivity" />
+    <activity android:name=".activities.JumpTextActivity" />
+    <activity
+      android:name=".activities.EventDispatchActivity"
+      android:screenOrientation="portrait" />
+    <activity
+      android:name=".activities.TreeGrowActivity"
+      android:screenOrientation="landscape" />
+    <activity
+      android:name=".activities.TreeActivity"
+      android:screenOrientation="portrait" />
+    <activity android:name=".activities.FrameActivity" />
+    <activity android:name=".activities.StayAwayActivity" />
+    <activity android:name=".activities.StaringActivity" />
+    <activity android:name=".activities.SnakeActivity" />
+    <activity android:name=".activities.HexaActivity" />
+    <activity android:name=".activities.LightingActivity" />
+    <activity android:name=".activities.TextAnimActivity" />
+    <activity android:name=".activities.TimeActivity" />
+    <activity android:name=".activities.PTTActivity" />
+    <activity android:name=".activities.WebActivity" />
+    <activity android:name=".activities.VideoActivity" />
+    <activity android:name=".activities.JumpBeanActivity" />
+    <activity android:name=".activities.TriAngleActivity" />
+    <activity android:name=".activities.SAEActivity" />
+    <activity android:name=".activities.CartActivity" />
+    <activity android:name=".activities.RippleActivity" />
+    <activity android:name=".activities.ArrowActivity" />
+    <activity android:name=".activities.HeartActivity" />
+    <activity android:name=".activities.MainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+  </application>
 
 </manifest>

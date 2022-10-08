@@ -36,15 +36,15 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         adapter.setListener(this);
         dataBinding.listView.setLayoutManager(new LinearLayoutManager(this));
         dataBinding.listView.setAdapter(adapter);
-//        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp2px(80));
-//        params.topMargin = 10;
-//        for (String s : Factory.keys()) {
-//            DnmButton button = new DnmButton(this);
-//            button.setText(s);
-//            button.setTag(s);
-//            button.setOnClickListener(this);
-//            dataBinding.btnContainer.addView(button, params);
-//        }
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp2px(80));
+        params.topMargin = 10;
+        for (String s : Factory.keys()) {
+            DnmButton button = new DnmButton(this);
+            button.setText(s);
+            button.setTag(s);
+            button.setOnClickListener(this);
+            dataBinding.btnContainer.addView(button, params);
+        }
         for (String permission : BASIC_PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, BASIC_PERMISSIONS, 111);
@@ -52,7 +52,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             }
         }
         if (debug) {
-            go(this, Factory.create(Factory.IMAGE_VERIFY));
+            go(this, Factory.create(Factory.ARROW));
         }
 
     }

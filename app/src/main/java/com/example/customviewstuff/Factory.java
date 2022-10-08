@@ -26,6 +26,7 @@ import com.example.customviewstuff.activities.SAEActivity;
 import com.example.customviewstuff.activities.SnakeActivity;
 import com.example.customviewstuff.activities.SnowActivity;
 import com.example.customviewstuff.activities.StackActivity;
+import com.example.customviewstuff.activities.StarWarActivity;
 import com.example.customviewstuff.activities.StaringActivity;
 import com.example.customviewstuff.activities.StayAwayActivity;
 import com.example.customviewstuff.activities.StereoActivity;
@@ -92,6 +93,7 @@ public class Factory {
     public static final String CHESS_MULTI = "五子棋（联机）";
     public static final String IMAGE_VERIFY = "图片滑块验证";
     public static final String SNOW = "雪花飘飘";
+    public static final String STAR_WAR = "飞机大战";
 
     static {
         caches = new HashMap<>();
@@ -137,6 +139,7 @@ public class Factory {
         caches.put(CHESS_MULTI, ChessMultiActivity.class);
         caches.put(IMAGE_VERIFY, ImageVerifyActivity.class);
         caches.put(SNOW, SnowActivity.class);
+        caches.put(STAR_WAR, StarWarActivity.class);
     }
 
     public static Class create(String s) {

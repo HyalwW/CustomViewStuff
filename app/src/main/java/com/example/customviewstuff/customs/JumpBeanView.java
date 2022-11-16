@@ -50,7 +50,7 @@ public class JumpBeanView extends BaseSurfaceView {
 
     @Override
     protected void onReady() {
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 100; i++) {
             Bean bean = new Bean(randomColor(), randomX(), randomY());
             list.add(bean);
             bean.setStartTime(System.currentTimeMillis());
@@ -70,8 +70,8 @@ public class JumpBeanView extends BaseSurfaceView {
         for (Bean bean : list) {
             mPaint.setColor(bean.color);
             dst.set(((int) (bean.nx - bitmap.getWidth() / 2)), ((int) (bean.ny - bitmap.getHeight() / 2)), ((int) (bean.nx + bitmap.getWidth() / 2)), (int) (bean.ny + bitmap.getHeight() / 2));
-            canvas.drawBitmap(bitmap, null, dst, mPaint);
-//            canvas.drawCircle(bean.nx, bean.ny, bean.radius, mPaint);
+//            canvas.drawBitmap(bitmap, null, dst, mPaint);
+            canvas.drawCircle(bean.nx, bean.ny, bean.radius, mPaint);
         }
     }
 

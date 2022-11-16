@@ -67,6 +67,10 @@ public class PTTActivity extends BaseActivity<ActivityPttBinding> implements Vie
                     String filePath = FileUtil.getFilePathByUri(this, uri);
                     bitmap = BitmapFactory.decodeFile(filePath);
                     Log.e("wwh", "MainActivity-->onActivityResult(): ");
+                    if (bitmap == null) {
+                        toast("图片获取失败");
+                        return;
+                    }
                     dataBinding.pttView.setBitmap(bitmap);
                 } else {
                     toast("选择的图片不存在");

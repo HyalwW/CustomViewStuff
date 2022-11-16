@@ -22,7 +22,7 @@ public class StayAwayView extends BaseSurfaceView {
     private float triggleLen;
     private float px, py;
     private float increment;
-    private int type = 1;
+    private int type = 0;
 
     public StayAwayView(Context context) {
         super(context);

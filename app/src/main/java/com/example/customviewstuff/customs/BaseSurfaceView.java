@@ -15,6 +15,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -111,7 +112,12 @@ public abstract class BaseSurfaceView extends SurfaceView implements SurfaceHold
                 }
             }
         } else {
-            Canvas canvas = holder.lockCanvas();
+            Canvas canvas = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                canvas = holder.lockHardwareCanvas();
+            } else {
+                canvas = holder.lockCanvas();
+            }
             if (canvas != null) {
                 if (!preventClear()) {
                     clearCanvas(canvas);

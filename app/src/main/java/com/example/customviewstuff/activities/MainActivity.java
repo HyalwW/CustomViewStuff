@@ -22,7 +22,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     private static final String[] BASIC_PERMISSIONS = new String[]{Manifest.permission.INTERNET,
             Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
 
-    private static final Boolean debug = false;
+    private static final Boolean debug = true;
 
     @Override
     protected int layoutId() {
@@ -52,7 +52,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             }
         }
         if (debug) {
-            go(this, Factory.create(Factory.ARROW));
+            go(this, Factory.create(Factory.LOVE_HEART));
         }
 
     }

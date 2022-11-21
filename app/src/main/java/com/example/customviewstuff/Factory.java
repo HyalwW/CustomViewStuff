@@ -96,22 +96,27 @@ public class Factory {
     public static final String IMAGE_VERIFY = "图片滑块验证";
     public static final String SNOW = "雪花飘飘";
     public static final String STAR_WAR = "飞机大战";
-    public static final String LOVE_HEART = "爱心";
+    public static final String LOVE_HEART = "芳心捕获器";
 
     static {
         caches = new LinkedHashMap<>();
         caches.put(LOVE_HEART, LoveActivity.class);
         caches.put(HEART, HeartActivity.class);
-        caches.put(ARROW, ArrowActivity.class);
-//        caches.put(CART_ANIM, CartActivity.class);
+        caches.put(STAR_WAR, StarWarActivity.class);
         caches.put(JUMP_BEAN, JumpBeanActivity.class);
+        caches.put(PIC_TO_TEXT, PTTActivity.class);
+        caches.put(TIME, TimeActivity.class);
+//        caches.put(CART_ANIM, CartActivity.class);
+        caches.put(SOCCER, SoccerActivity.class);
+        caches.put(STACK, StackActivity.class);
         caches.put(RIPPLE, RippleActivity.class);
         caches.put(SAE, SAEActivity.class);
+        caches.put(ARROW, ArrowActivity.class);
+        caches.put(CHESS, ChessActivity.class);
+        caches.put(CHESS_MULTI, ChessMultiActivity.class);
         caches.put(TRIANGLE, TriAngleActivity.class);
         caches.put(SHINNY_WEB, WebActivity.class);
-        caches.put(PIC_TO_TEXT, PTTActivity.class);
         caches.put(STRING_VIDEO, VideoActivity.class);
-        caches.put(TIME, TimeActivity.class);
         caches.put(TEXT_ANIM, TextAnimActivity.class);
         caches.put(TEXT_TREE_GROW, TreeGrowActivity.class);
 //        caches.put(LIGHTING, LightingActivity.class);
@@ -125,7 +130,6 @@ public class Factory {
         caches.put(JUMP_TEXT, JumpTextActivity.class);
         caches.put(WAVE_TEXT, WaveTextActivity.class);
         caches.put(WAVE_WATER, WaveActivity.class);
-        caches.put(SOCCER, SoccerActivity.class);
         caches.put(FADE_AWAY, FadeAwayActivity.class);
         caches.put(D_N_A, HelixActivity.class);
 //        caches.put(STEREO, StereoActivity.class);
@@ -134,16 +138,12 @@ public class Factory {
         caches.put(EYE, EyeActivity.class);
 //        caches.put(RADAR, RadarActivity.class);
 //        caches.put(TOAST, ToastActivity.class);
-        caches.put(STACK, StackActivity.class);
         caches.put(CHAT, ChatRoomActivity.class);
         caches.put(BOBBLE, BobbleActivity.class);
         caches.put(IMAGE_VIEW, BitmapViewActivity.class);
 //        caches.put(ILLUSION, IllusionActivity.class);
-        caches.put(CHESS, ChessActivity.class);
-        caches.put(CHESS_MULTI, ChessMultiActivity.class);
         caches.put(IMAGE_VERIFY, ImageVerifyActivity.class);
         caches.put(SNOW, SnowActivity.class);
-        caches.put(STAR_WAR, StarWarActivity.class);
     }
 
     public static Class create(String s) {
